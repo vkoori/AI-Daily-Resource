@@ -1,0 +1,144 @@
+---
+import CategoryBadge from './CategoryBadge.astro';
+import { formatPersianDate, formatIsoDate, type Item } from '../utils/content';
+
+interface Props {
+  item: Item;
+  showDate?: boolean;
+}
+const { item, showDate = true } = Astro.props;
+const { title, url, source, summary, category, tags, kind, verified, date, originalDate } = item.data;
+
+const kindLabels: Record<string, string> = {
+  news: 'خبر',
+  technique: 'تکنیک',
+  tool: 'ابزار',
+  paper: 'مقاله',
+  reference: 'مرجع',
+  'case-study': 'مطالعه موردی',
+};
+---
+<article
+  class="card"
+  data-title={title}
+  data-summary={summary}
+  data-category={category}
+  data-tags={(tags ?? []).join(',')}
+  data-date={formatIsoDate(date)}
+>
+  <div class="card-top">
+    <CategoryBadge slug={category} size="sm" />
+    <span class="kind-chip">{kindLabels[kind ?? 'news'] ?? kind}</span>
+    {verified && (
+      <span class="verified" title="تأیید‌شده با منبع رسمی/اولیه">
+        <span aria-hidden="true">✓</span> تأیید‌شده
+      </span>
+    )}
+  </div>
+
+  <h3 class="card-title">
+    <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+  </h3>
+
+  <p class="card-summary">{summary}</p>
+
+  {tags && tags.length > 0 && (
+    <ul class="tag-list" aria-label="برچسب‌ها">
+      {tags.map((t: string) => <li class="ltr">{t}</li>)}
+    </ul>
+  )}
+
+  <div class="card-meta">
+    <span class="source">{source}</span>
+    {showDate && (
+      <time class="ltr" datetime={formatIsoDate(date)}>{formatPersianDate(date)}</time>
+    )}
+    {originalDate && (
+      <span class="original-date">
+        تاریخ انتشار اصلی: <time class="ltr" datetime={formatIsoDate(originalDate)}>{formatPersianDate(originalDate)}</time>
+      </span>
+    )}
+    <a class="source-url ltr" href={url} target="_blank" rel="noopener noreferrer">{new URL(url).hostname}</a>
+  </div>
+</article>
+
+<style>
+  .card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-5);
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .card:hover {
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--border-strong);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .kind-chip {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: var(--sp-1) var(--sp-3);
+  }
+  .verified {
+    font-size: var(--fs-xs);
+    color: var(--color-accent-teal);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    margin-inline-start: auto;
+  }
+
+  .card-title { margin: 0; font-size: var(--fs-md); }
+  .card-title a { color: var(--text); }
+  .card-title a:hover { color: var(--link); }
+
+  .card-summary {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-loose);
+  }
+
+  .tag-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .tag-list li {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    background: var(--bg-sunken);
+    border-radius: var(--radius-sm);
+    padding: 0.15rem var(--sp-2);
+  }
+
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+    font-size: var(--fs-xs);
+    color: var(--text-faint);
+    padding-top: var(--sp-2);
+    border-top: 1px dashed var(--border);
+  }
+  .card-meta .source { font-weight: 600; color: var(--text-muted); }
+  .card-meta .original-date { color: var(--text-faint); }
+  .card-meta .source-url { margin-inline-start: auto; color: var(--text-faint); }
+  .card-meta .source-url:hover { color: var(--link); }
+</style>

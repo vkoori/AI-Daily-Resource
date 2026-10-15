@@ -1,0 +1,128 @@
+/*
+  Design Tokens — single source of truth for color, type, spacing, layout.
+  Built once; daily content runs never touch this file.
+*/
+:root {
+  /* ---- Color: brand ---- */
+  --color-brand-50:  #eef4ff;
+  --color-brand-100: #dce8ff;
+  --color-brand-200: #b6cdff;
+  --color-brand-300: #85abff;
+  --color-brand-400: #5684ff;
+  --color-brand-500: #3a63f2;
+  --color-brand-600: #2c49d6;
+  --color-brand-700: #2439ad;
+  --color-brand-800: #1f3187;
+  --color-brand-900: #1c2c6b;
+
+  /* ---- Color: neutrals ---- */
+  --color-ink-50:  #f7f8fa;
+  --color-ink-100: #eef0f4;
+  --color-ink-200: #dde1e8;
+  --color-ink-300: #c2c8d4;
+  --color-ink-400: #9aa3b5;
+  --color-ink-500: #717a8c;
+  --color-ink-600: #545c6e;
+  --color-ink-700: #3c4150;
+  --color-ink-800: #282b36;
+  --color-ink-900: #15171d;
+
+  /* ---- Color: accent (for kind/category badges) ---- */
+  --color-accent-teal:   #0f9d8a;
+  --color-accent-amber:  #c47b17;
+  --color-accent-violet: #7c4fe0;
+  --color-accent-rose:   #d0417e;
+
+  /* ---- Semantic colors (light theme default) ---- */
+  --bg:            #ffffff;
+  --bg-raised:     var(--color-ink-50);
+  --bg-sunken:     var(--color-ink-100);
+  --text:          var(--color-ink-900);
+  --text-muted:    var(--color-ink-600);
+  --text-faint:    var(--color-ink-500);
+  --border:        var(--color-ink-200);
+  --border-strong: var(--color-ink-300);
+  --link:          var(--color-brand-600);
+  --link-hover:    var(--color-brand-700);
+  --focus-ring:    var(--color-brand-400);
+  --badge-bg:      var(--color-brand-50);
+  --badge-text:    var(--color-brand-700);
+  --card-shadow:   0 1px 2px rgba(21, 23, 29, 0.04), 0 1px 1px rgba(21, 23, 29, 0.03);
+  --card-shadow-hover: 0 6px 20px rgba(21, 23, 29, 0.08), 0 2px 6px rgba(21, 23, 29, 0.05);
+
+  /* ---- Typography ---- */
+  --font-fa: 'Vazirmatn', 'Tahoma', sans-serif;
+  --font-en: 'Vazirmatn', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --fs-xs:   0.8125rem;
+  --fs-sm:   0.9375rem;
+  --fs-base: 1rem;
+  --fs-md:   1.125rem;
+  --fs-lg:   1.375rem;
+  --fs-xl:   1.75rem;
+  --fs-2xl:  2.25rem;
+
+  --lh-tight:  1.3;
+  --lh-normal: 1.6;
+  --lh-loose:  1.85;
+
+  /* ---- Spacing scale ---- */
+  --sp-1:  0.25rem;
+  --sp-2:  0.5rem;
+  --sp-3:  0.75rem;
+  --sp-4:  1rem;
+  --sp-5:  1.5rem;
+  --sp-6:  2rem;
+  --sp-7:  3rem;
+  --sp-8:  4rem;
+
+  /* ---- Layout ---- */
+  --content-width: 46rem;
+  --page-width:    78rem;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  --transition-fast: 120ms ease;
+  --transition-base:  200ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg:            var(--color-ink-900);
+    --bg-raised:     #1b1e26;
+    --bg-sunken:     #0f1116;
+    --text:          var(--color-ink-50);
+    --text-muted:    var(--color-ink-300);
+    --text-faint:    var(--color-ink-400);
+    --border:        var(--color-ink-700);
+    --border-strong: var(--color-ink-600);
+    --link:          var(--color-brand-300);
+    --link-hover:    var(--color-brand-200);
+    --focus-ring:    var(--color-brand-300);
+    --badge-bg:      rgba(58, 99, 242, 0.18);
+    --badge-text:    var(--color-brand-200);
+    --card-shadow:   0 1px 2px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg:            var(--color-ink-900);
+  --bg-raised:     #1b1e26;
+  --bg-sunken:     #0f1116;
+  --text:          var(--color-ink-50);
+  --text-muted:    var(--color-ink-300);
+  --text-faint:    var(--color-ink-400);
+  --border:        var(--color-ink-700);
+  --border-strong: var(--color-ink-600);
+  --link:          var(--color-brand-300);
+  --link-hover:    var(--color-brand-200);
+  --focus-ring:    var(--color-brand-300);
+  --badge-bg:      rgba(58, 99, 242, 0.18);
+  --badge-text:    var(--color-brand-200);
+  --card-shadow:   0 1px 2px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+}

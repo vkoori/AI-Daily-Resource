@@ -1,0 +1,28 @@
+---
+import { categoryLabel } from '../utils/content';
+interface Props {
+  slug: string;
+  size?: 'sm' | 'md';
+}
+const { slug, size = 'md' } = Astro.props;
+const label = categoryLabel(slug);
+const base = import.meta.env.BASE_URL;
+---
+<a class:list={['badge', size]} href={`${base}category/${slug}/`}>
+  {label.fa}
+</a>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge:hover { text-decoration: none; filter: brightness(0.96); }
+  .badge.md { font-size: var(--fs-xs); padding: var(--sp-1) var(--sp-3); }
+  .badge.sm { font-size: 0.7rem; padding: 0.15rem var(--sp-2); }
+</style>

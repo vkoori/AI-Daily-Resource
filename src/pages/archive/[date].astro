@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { groupByDay, formatPersianDate, categoryLabel } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const byDay = await groupByDay();
+  return [...byDay.entries()].map(([date, items]) => ({
+    params: { date },
+    props: { items },
+  }));
+}
+
+const { date } = Astro.params;
+const { items } = Astro.props;
+
+const byCategory = new Map<string, typeof items>();
+for (const item of items) {
+  const cat = item.data.category;
+  if (!byCategory.has(cat)) byCategory.set(cat, []);
+  byCategory.get(cat)!.push(item);
+}
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title={`گزارش ${formatPersianDate(new Date(date!))} · دیجست روزانه هوش مصنوعی`}>
+  <section class="container head">
+    <a class="back" href={`${base}archive/`}>← آرشیو</a>
+    <h1>گزارش <time class="ltr" datetime={date}>{formatPersianDate(new Date(date!))}</time></h1>
+    <p class="muted">{items.length} مطلب در {byCategory.size} دسته‌بندی</p>
+  </section>
+
+  {[...byCategory.entries()].map(([cat, catItems]) => (
+    <section class="container cat-section">
+      <h2>{categoryLabel(cat).fa} <span class="en ltr">{categoryLabel(cat).en}</span></h2>
+      <div class="grid">
+        {catItems.map((item) => <ArticleCard item={item} showDate={false} />)}
+      </div>
+    </section>
+  ))}
+</BaseLayout>
+
+<style>
+  .head { padding-block: var(--sp-7) var(--sp-5); }
+  .back { font-size: var(--fs-sm); color: var(--text-muted); }
+  .muted { color: var(--text-faint); font-size: var(--fs-sm); }
+  .cat-section { padding-block: var(--sp-5); }
+  .cat-section h2 { font-size: var(--fs-lg); }
+  .cat-section .en { font-size: var(--fs-xs); color: var(--text-faint); font-weight: 400; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--sp-5);
+  }
+</style>

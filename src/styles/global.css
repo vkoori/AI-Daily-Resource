@@ -1,0 +1,96 @@
+@import './tokens.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-fa);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  direction: rtl;
+  text-align: right;
+}
+
+img, svg { display: block; max-width: 100%; }
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+a:hover { color: var(--link-hover); text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  margin: 0 0 var(--sp-3);
+}
+h1 { font-size: var(--fs-2xl); }
+h2 { font-size: var(--fs-xl); }
+h3 { font-size: var(--fs-lg); }
+p { margin: 0 0 var(--sp-4); }
+
+ul, ol { margin: 0 0 var(--sp-4); padding-inline-start: var(--sp-5); }
+
+/*
+  English words, URLs, inline code and numbers must read left-to-right even
+  inside an RTL sentence. Use dir="ltr" + unicode-bidi: isolate (not just
+  direction) so punctuation and surrounding Persian text stay correctly
+  ordered around the isolated run.
+*/
+.ltr,
+code, pre, kbd, samp,
+.source-url,
+time {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: var(--font-mono);
+}
+
+code, pre {
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+  font-size: 0.9em;
+}
+code { padding: 0.15em 0.4em; }
+pre { padding: var(--sp-4); overflow-x: auto; text-align: left; }
+pre code { padding: 0; background: none; }
+
+.container {
+  width: 100%;
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding-inline: var(--sp-5);
+}
+
+.prose {
+  max-width: var(--content-width);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Smooth theme + color transitions without affecting layout */
+a, button, .card, .badge { transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast); }
+
+@media (max-width: 640px) {
+  :root { --fs-2xl: 1.75rem; --fs-xl: 1.375rem; --page-width: 100%; }
+  .container { padding-inline: var(--sp-4); }
+}

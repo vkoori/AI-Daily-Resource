@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { groupByDay, formatPersianDate, categoryList } from '../utils/content';
+
+const byDay = await groupByDay();
+const days = [...byDay.keys()].sort().reverse();
+const latestDay = days[0];
+const latestItems = latestDay ? byDay.get(latestDay)! : [];
+const totalItems = [...byDay.values()].reduce((n, arr) => n + arr.length, 0);
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="دیجست روزانه هوش مصنوعی · AI Daily Resource">
+  <section class="hero container">
+    <h1>دیجست روزانه هوش مصنوعی</h1>
+    <p class="lede">
+      هر روز، جدیدترین اخبار، مدل‌ها، تکنیک‌های مهندسی و ابزارهای توسعه با کمک AI را بررسی،
+      دسته‌بندی و خلاصه می‌کنیم — با منبع رسمی و لینک مستقیم برای هر مورد.
+    </p>
+    <div class="hero-stats">
+      <span>{totalItems} مطلب آرشیو شده</span>
+      <span>{days.length} روز گزارش</span>
+    </div>
+    <div class="hero-actions">
+      <a class="btn" href={`${base}archive/`}>مشاهده آرشیو کامل</a>
+      <a class="btn ghost" href={`${base}search/`}>جست‌وجو در مطالب</a>
+    </div>
+  </section>
+
+  {latestDay ? (
+    <section class="container latest">
+      <div class="section-head">
+        <h2>آخرین گزارش · <time class="ltr" datetime={latestDay}>{formatPersianDate(new Date(latestDay))}</time></h2>
+        <a href={`${base}archive/${latestDay}/`}>مشاهده این روز به‌صورت کامل ←</a>
+      </div>
+      <div class="grid">
+        {latestItems.map((item) => <ArticleCard item={item} showDate={false} />)}
+      </div>
+    </section>
+  ) : (
+    <section class="container empty">
+      <p>هنوز مطلبی منتشر نشده است. اولین اجرای روزانه به‌زودی این بخش را پر می‌کند.</p>
+    </section>
+  )}
+
+  <section class="container categories">
+    <h2>مرور بر اساس دسته‌بندی</h2>
+    <div class="cat-grid">
+      {categoryList.map((c) => (
+        <a class="cat-tile" href={`${base}category/${c.slug}/`}>
+          <span class="cat-fa">{c.fa}</span>
+          <span class="cat-en ltr">{c.en}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--sp-8) var(--sp-6);
+    max-width: var(--content-width);
+  }
+  .hero h1 { font-size: var(--fs-2xl); }
+  .lede { color: var(--text-muted); font-size: var(--fs-md); line-height: var(--lh-loose); }
+  .hero-stats {
+    display: flex;
+    gap: var(--sp-4);
+    font-size: var(--fs-sm);
+    color: var(--text-faint);
+    margin-bottom: var(--sp-5);
+  }
+  .hero-actions { display: flex; gap: var(--sp-3); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--sp-3) var(--sp-5);
+    background: var(--color-brand-500);
+    color: #fff;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+  }
+  .btn:hover { background: var(--color-brand-600); text-decoration: none; color: #fff; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+  }
+  .btn.ghost:hover { background: var(--bg-raised); color: var(--text); }
+
+  .latest { padding-block: var(--sp-6); }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-5);
+  }
+  .section-head h2 { margin: 0; }
+  .section-head a { font-size: var(--fs-sm); white-space: nowrap; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--sp-5);
+  }
+
+  .empty {
+    padding-block: var(--sp-7);
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .categories { padding-block: var(--sp-7); }
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: var(--sp-3);
+  }
+  .cat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: var(--sp-4);
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+  }
+  .cat-tile:hover { border-color: var(--border-strong); text-decoration: none; }
+  .cat-fa { font-weight: 600; font-size: var(--fs-sm); }
+  .cat-en { font-size: var(--fs-xs); color: var(--text-faint); }
+</style>

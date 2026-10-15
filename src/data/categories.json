@@ -1,0 +1,15 @@
+{
+  "ai-news-trends": { "fa": "اخبار و ترندهای هوش مصنوعی", "en": "AI News & Trends" },
+  "ai-models-research": { "fa": "مدل‌ها و پژوهش", "en": "AI Models & Research" },
+  "ai-engineering": { "fa": "مهندسی هوش مصنوعی", "en": "AI Engineering" },
+  "rag-knowledge-systems": { "fa": "RAG و سیستم‌های دانش", "en": "RAG & Knowledge Systems" },
+  "ai-coding-dev-tools": { "fa": "کدنویسی و ابزارهای توسعه", "en": "AI Coding & Developer Tools" },
+  "vibe-coding-practices": { "fa": "Vibe Coding و شیوه‌های توسعه با AI", "en": "Vibe Coding & AI-Assisted Development" },
+  "inference-infrastructure": { "fa": "اجرا و زیرساخت", "en": "Inference & Infrastructure" },
+  "evaluation-production": { "fa": "ارزیابی و تولید", "en": "Evaluation & Production" },
+  "training-fine-tuning": { "fa": "آموزش و Fine-Tuning", "en": "Training & Fine-Tuning" },
+  "multimodal-emerging": { "fa": "چندوجهی و فناوری‌های نوظهور", "en": "Multimodal & Emerging AI" },
+  "security-safety-governance": { "fa": "امنیت، ایمنی و حاکمیت", "en": "AI Security, Safety & Governance" },
+  "applications-case-studies": { "fa": "کاربردها و مطالعات موردی", "en": "AI Applications & Case Studies" },
+  "concepts-techniques": { "fa": "مفاهیم و تکنیک‌ها", "en": "Concepts & Techniques" }
+}

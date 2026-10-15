@@ -1,0 +1,151 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { categoryList } from '../utils/content';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title="جست‌وجو · دیجست روزانه هوش مصنوعی">
+  <section class="container head">
+    <h1>جست‌وجو در همه مطالب</h1>
+    <p class="muted">در عنوان، خلاصه و برچسب‌های تمام روزهای آرشیو‌شده جست‌وجو کنید.</p>
+
+    <div class="controls">
+      <input
+        id="q"
+        type="search"
+        class="search-input"
+        placeholder="مثلاً: RAG، Prompt Caching، Claude..."
+        autocomplete="off"
+      />
+      <select id="cat" class="cat-select">
+        <option value="">همه دسته‌بندی‌ها</option>
+        {categoryList.map((c) => <option value={c.slug}>{c.fa}</option>)}
+      </select>
+    </div>
+  </section>
+
+  <section class="container">
+    <p id="status" class="muted" role="status"></p>
+    <div id="results" class="grid"></div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head { padding-block: var(--sp-7) var(--sp-5); }
+  .muted { color: var(--text-muted); font-size: var(--fs-sm); }
+  .controls {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-4);
+    flex-wrap: wrap;
+  }
+  .search-input, .cat-select {
+    font: inherit;
+    padding: var(--sp-3) var(--sp-4);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--bg-raised);
+    color: var(--text);
+  }
+  .search-input { flex: 1 1 18rem; }
+  .cat-select { flex: 0 1 14rem; }
+  .search-input:focus, .cat-select:focus { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+
+  #status { padding-block: var(--sp-3); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--sp-5);
+    padding-bottom: var(--sp-7);
+  }
+  .result-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .result-card h3 { margin: 0; font-size: var(--fs-md); }
+  .result-card h3 a { color: var(--text); }
+  .result-card p { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }
+  .result-meta { font-size: var(--fs-xs); color: var(--text-faint); display: flex; gap: var(--sp-3); }
+</style>
+
+<script>
+  type SearchItem = {
+    title: string;
+    summary: string;
+    source: string;
+    url: string;
+    category: string;
+    categoryLabel: string;
+    tags: string[];
+    kind: string;
+    date: string;
+  };
+
+  const qInput = document.getElementById('q') as HTMLInputElement;
+  const catSelect = document.getElementById('cat') as HTMLSelectElement;
+  const resultsEl = document.getElementById('results') as HTMLDivElement;
+  const statusEl = document.getElementById('status') as HTMLParagraphElement;
+
+  let allItems: SearchItem[] = [];
+
+  async function load() {
+    statusEl.textContent = 'در حال بارگذاری نمایه جست‌وجو...';
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}search-index.json`);
+      allItems = await res.json();
+      statusEl.textContent = `${allItems.length} مطلب قابل جست‌وجو.`;
+      render();
+    } catch (err) {
+      statusEl.textContent = 'بارگذاری نمایه جست‌وجو ناموفق بود.';
+    }
+  }
+
+  function render() {
+    const q = qInput.value.trim().toLowerCase();
+    const cat = catSelect.value;
+
+    const filtered = allItems.filter((item) => {
+      const matchesCat = !cat || item.category === cat;
+      if (!matchesCat) return false;
+      if (!q) return true;
+      const haystack = [item.title, item.summary, item.source, ...item.tags]
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+
+    resultsEl.innerHTML = '';
+    if (q || cat) {
+      statusEl.textContent = `${filtered.length} نتیجه یافت شد.`;
+    } else {
+      statusEl.textContent = `${allItems.length} مطلب قابل جست‌وجو.`;
+    }
+
+    for (const item of filtered.slice(0, 60)) {
+      const card = document.createElement('article');
+      card.className = 'result-card';
+      card.innerHTML = `
+        <h3><a href="${item.url}" target="_blank" rel="noopener noreferrer"></a></h3>
+        <p></p>
+        <div class="result-meta">
+          <span></span>
+          <time class="ltr" datetime="${item.date}">${item.date}</time>
+        </div>
+      `;
+      (card.querySelector('h3 a') as HTMLAnchorElement).textContent = item.title;
+      (card.querySelector('p') as HTMLParagraphElement).textContent = item.summary;
+      (card.querySelector('.result-meta span') as HTMLSpanElement).textContent =
+        `${item.categoryLabel} · ${item.source}`;
+      resultsEl.appendChild(card);
+    }
+  }
+
+  qInput.addEventListener('input', render);
+  catSelect.addEventListener('change', render);
+  load();
+</script>

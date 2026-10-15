@@ -1,0 +1,35 @@
+---
+const base = import.meta.env.BASE_URL;
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container bar">
+    <p class="muted">
+      تولید و به‌روزرسانی خودکار روزانه ·
+      <a href="https://github.com/vkoori/ai-daily-resource" class="ltr">github.com/vkoori/ai-daily-resource</a>
+    </p>
+    <nav class="footer-nav" aria-label="ناوبری پاورقی">
+      <a href={`${base}archive/`}>آرشیو</a>
+      <a href={`${base}search/`}>جست‌وجو</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--border);
+    margin-top: var(--sp-8);
+  }
+  .bar {
+    padding-block: var(--sp-5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--fs-sm);
+  }
+  .muted { color: var(--text-faint); margin: 0; }
+  .footer-nav { display: flex; gap: var(--sp-4); }
+  .footer-nav a { color: var(--text-muted); }
+</style>
