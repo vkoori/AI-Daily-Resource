@@ -25,13 +25,15 @@ export async function groupByDay(): Promise<Map<string, Item[]>> {
   return map;
 }
 
-export function categoryLabel(slug: string): { fa: string; en: string } {
-  return (categories as Record<string, { fa: string; en: string }>)[slug] ?? { fa: slug, en: slug };
+export type CategoryInfo = { fa: string; en: string; scope?: string };
+
+export function categoryLabel(slug: string): CategoryInfo {
+  return (categories as Record<string, CategoryInfo>)[slug] ?? { fa: slug, en: slug };
 }
 
-export const categoryList = Object.entries(
-  categories as Record<string, { fa: string; en: string }>
-).map(([slug, label]) => ({ slug, ...label }));
+export const categoryList = Object.entries(categories as Record<string, CategoryInfo>).map(
+  ([slug, label]) => ({ slug, ...label })
+);
 
 export function formatPersianDate(d: Date): string {
   return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {

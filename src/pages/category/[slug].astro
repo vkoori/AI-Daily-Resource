@@ -21,6 +21,7 @@ const base = import.meta.env.BASE_URL;
     <a class="back" href={`${base}`}>← صفحه اصلی</a>
     <h1>{label.fa}</h1>
     <p class="en ltr">{label.en}</p>
+    {label.scope && <p class="scope">{label.scope}</p>}
     <p class="muted">{items.length} مطلب</p>
   </section>
 
@@ -39,6 +40,7 @@ const base = import.meta.env.BASE_URL;
   .head { padding-block: var(--sp-7) var(--sp-5); }
   .back { font-size: var(--fs-sm); color: var(--text-muted); }
   .en { color: var(--text-faint); font-size: var(--fs-sm); margin: 0 0 var(--sp-2); }
+  .scope { color: var(--text-muted); font-size: var(--fs-sm); max-width: var(--content-width); margin: 0 0 var(--sp-3); line-height: var(--lh-loose); }
   .muted { color: var(--text-faint); font-size: var(--fs-sm); }
   .grid {
     display: grid;

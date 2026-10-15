@@ -1,15 +1,67 @@
 {
-  "ai-news-trends": { "fa": "اخبار و ترندهای هوش مصنوعی", "en": "AI News & Trends" },
-  "ai-models-research": { "fa": "مدل‌ها و پژوهش", "en": "AI Models & Research" },
-  "ai-engineering": { "fa": "مهندسی هوش مصنوعی", "en": "AI Engineering" },
-  "rag-knowledge-systems": { "fa": "RAG و سیستم‌های دانش", "en": "RAG & Knowledge Systems" },
-  "ai-coding-dev-tools": { "fa": "کدنویسی و ابزارهای توسعه", "en": "AI Coding & Developer Tools" },
-  "vibe-coding-practices": { "fa": "Vibe Coding و شیوه‌های توسعه با AI", "en": "Vibe Coding & AI-Assisted Development" },
-  "inference-infrastructure": { "fa": "اجرا و زیرساخت", "en": "Inference & Infrastructure" },
-  "evaluation-production": { "fa": "ارزیابی و تولید", "en": "Evaluation & Production" },
-  "training-fine-tuning": { "fa": "آموزش و Fine-Tuning", "en": "Training & Fine-Tuning" },
-  "multimodal-emerging": { "fa": "چندوجهی و فناوری‌های نوظهور", "en": "Multimodal & Emerging AI" },
-  "security-safety-governance": { "fa": "امنیت، ایمنی و حاکمیت", "en": "AI Security, Safety & Governance" },
-  "applications-case-studies": { "fa": "کاربردها و مطالعات موردی", "en": "AI Applications & Case Studies" },
-  "concepts-techniques": { "fa": "مفاهیم و تکنیک‌ها", "en": "Concepts & Techniques" }
+  "ai-news-trends": {
+    "fa": "اخبار و ترندهای هوش مصنوعی",
+    "en": "AI News & Trends",
+    "scope": "اخبار، تحولات مهم، فناوری‌های نوظهور و روندهای آینده."
+  },
+  "ai-models-research": {
+    "fa": "مدل‌ها و پژوهش",
+    "en": "AI Models & Research",
+    "scope": "مدل‌های جدید، معماری‌ها، مقالات پژوهشی، بنچمارک‌ها، مقایسه عملکرد و محدودیت‌ها."
+  },
+  "ai-engineering": {
+    "fa": "مهندسی هوش مصنوعی",
+    "en": "AI Engineering",
+    "scope": "طراحی و پیاده‌سازی سیستم‌های AI، معماری Agentها، Multi-Agent Systems، Harness Engineering، Context Engineering، Prompt Caching، Tool Calling، MCP، Skills و سایر الگوهای مهندسی."
+  },
+  "rag-knowledge-systems": {
+    "fa": "RAG و سیستم‌های دانش",
+    "en": "RAG & Knowledge Systems",
+    "scope": "انواع RAG، بازیابی اطلاعات، Embedding، Reranking، Vector Databases، GraphRAG، جست‌وجوی ترکیبی و معماری‌های جدید."
+  },
+  "ai-coding-dev-tools": {
+    "fa": "کدنویسی و ابزارهای توسعه",
+    "en": "AI Coding & Developer Tools",
+    "scope": "Vibe Coding، کدنویسی Agentic، ابزارهای توسعه مبتنی بر AI، محیط‌های اجرایی، اتوماسیون توسعه و تغییرات فرایند مهندسی نرم‌افزار."
+  },
+  "vibe-coding-practices": {
+    "fa": "Vibe Coding و شیوه‌های توسعه با AI",
+    "en": "Vibe Coding & AI-Assisted Development Practices",
+    "scope": "اصول کار مؤثر با AI هنگام توسعه نرم‌افزار؛ نوشتن و مدیریت Context، طراحی وظایف، شکستن مسائل به گام‌های کوچک، انتخاب مدل و ابزار مناسب، برنامه‌ریزی قبل از پیاده‌سازی، مدیریت Agentها، بازبینی کد تولیدشده، تست، Debugging، کنترل کیفیت، امنیت، مدیریت تغییرات Git و جلوگیری از تولید کد غیرقابل‌نگهداری. همچنین روش‌های همکاری مؤثر با AI، محدودیت‌های آن، و تفاوت بین استفاده سطحی از AI و توسعه مهندسی‌شده با آن."
+  },
+  "inference-infrastructure": {
+    "fa": "اجرا و زیرساخت",
+    "en": "Inference & Infrastructure",
+    "scope": "اجرای محلی مدل‌ها، Serving، Quantization، بهینه‌سازی سرعت و هزینه، GPU، زیرساخت و مقیاس‌پذیری."
+  },
+  "evaluation-production": {
+    "fa": "ارزیابی و تولید",
+    "en": "Evaluation & Production",
+    "scope": "ارزیابی مدل‌ها و Agentها، Observability، تست، مانیتورینگ، قابلیت اطمینان، امنیت و استقرار در محیط واقعی."
+  },
+  "training-fine-tuning": {
+    "fa": "آموزش و Fine-Tuning",
+    "en": "Training & Fine-Tuning",
+    "scope": "روش‌های آموزش، Fine-Tuning، Post-Training، داده‌های آموزشی و تکنیک‌های بهبود مدل."
+  },
+  "multimodal-emerging": {
+    "fa": "چندوجهی و فناوری‌های نوظهور",
+    "en": "Multimodal & Emerging AI",
+    "scope": "مدل‌های تصویر، صوت، ویدئو، مدل‌های چندوجهی، Robotics و سایر حوزه‌های نوظهور."
+  },
+  "security-safety-governance": {
+    "fa": "امنیت، ایمنی و حاکمیت",
+    "en": "AI Security, Safety & Governance",
+    "scope": "آسیب‌پذیری‌ها، Prompt Injection، کنترل دسترسی، حریم خصوصی، ایمنی و حاکمیت هوش مصنوعی."
+  },
+  "applications-case-studies": {
+    "fa": "کاربردها و مطالعات موردی",
+    "en": "AI Applications & Case Studies",
+    "scope": "کاربردهای واقعی، تجربه‌های مهندسی شرکت‌ها، معماری‌های عملی و درس‌آموخته‌های پروژه‌ها."
+  },
+  "concepts-techniques": {
+    "fa": "مفاهیم و تکنیک‌ها",
+    "en": "Concepts & Techniques",
+    "scope": "مفاهیم جدید یا کمترشناخته‌شده، استانداردها، پروتکل‌ها، ابزارها و تکنیک‌هایی که در اکوسیستم AI اهمیت پیدا می‌کنند."
+  }
 }
