@@ -1,6 +1,6 @@
 ---
 import CategoryBadge from './CategoryBadge.astro';
-import { formatPersianDate, formatIsoDate, type Item } from '../utils/content';
+import { formatPersianDate, formatIsoDate, estimateReadingTime, type Item } from '../utils/content';
 
 interface Props {
   item: Item;
@@ -8,6 +8,8 @@ interface Props {
 }
 const { item, showDate = true } = Astro.props;
 const { title, url, source, summary, category, tags, kind, verified, date, originalDate } = item.data;
+const base = import.meta.env.BASE_URL;
+const readingMinutes = estimateReadingTime(item.body ?? '');
 
 const kindLabels: Record<string, string> = {
   news: 'خبر',
@@ -37,10 +39,11 @@ const kindLabels: Record<string, string> = {
   </div>
 
   <h3 class="card-title">
-    <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+    <a href={`${base}items/${item.slug}/`}>{title}</a>
   </h3>
 
   <p class="card-summary">{summary}</p>
+  <span class="reading-time">{readingMinutes} دقیقه مطالعه</span>
 
   {tags && tags.length > 0 && (
     <ul class="tag-list" aria-label="برچسب‌ها">
@@ -109,6 +112,11 @@ const kindLabels: Record<string, string> = {
     color: var(--text-muted);
     font-size: var(--fs-sm);
     line-height: var(--lh-loose);
+  }
+
+  .reading-time {
+    font-size: var(--fs-xs);
+    color: var(--text-faint);
   }
 
   .tag-list {

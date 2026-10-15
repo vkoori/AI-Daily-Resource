@@ -10,6 +10,7 @@ export const GET: APIRoute = async () => {
     summary: item.data.summary,
     source: item.data.source,
     url: item.data.url,
+    slug: item.slug,
     category: item.data.category,
     categoryLabel: categoryLabel(item.data.category).fa,
     tags: item.data.tags ?? [],

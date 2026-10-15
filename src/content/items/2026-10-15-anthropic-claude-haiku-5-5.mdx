@@ -1,0 +1,113 @@
+---
+title: "معرفی Claude Haiku 5.5"
+date: 2026-10-15
+originalDate: 2026-10-07
+source: "Anthropic"
+url: "https://www.anthropic.com/claude-haiku-5-5"
+category: "ai-models-research"
+kind: "news"
+verified: true
+tags: ["claude", "haiku", "pricing", "subagents", "cost-optimization"]
+summary: >
+  Anthropic مدل Claude Haiku 5.5 را برای کارهای پرحجم و حساس به هزینه معرفی
+  کرد: حدود ۷۵٪ ارزان‌تر از Haiku 4.5 (ورودی ۰٫۱۰ دلار و خروجی ۰٫۵۰ دلار به
+  ازای هر میلیون توکن برای Promptهای زیر ۱۰۰ هزار توکن)، و اولین مدل رده Haiku
+  با قابلیت تنظیم Effort. در بنچمارک‌ها جهش بزرگی نسبت به Haiku 4.5 دارد: در
+  OSWorld 2.1 از ۱۵٫۷٪ به ۷۲٫۴٪ و در Terminal-Bench 4.0 از صفر به ۳۹٫۲٪ رسیده،
+  و حتی از GPT-6 Luna در اغلب معیارها جلوتر است؛ با این حال Sonnet 5.5 و Opus
+  5.5 همچنان برای کدنویسی Agentic پیچیده برتری دارند. کاربردهای توصیه‌شده:
+  خلاصه‌سازی، Compaction مکالمه، پرس‌وجوی دیتابیس، دسته‌بندی، و نقش Subagent
+  در کنار Sonnet/Opus برای کارهای کدنویسی؛ همچنین کار با مرورگر و کامپیوتر
+  (در نسخه Beta SDKهای پایتون/TypeScript). هم‌زمان، قیمت خواندن از Cache برای
+  Sonnet 5.5 نصف شد (از ۰٫۲۰ به ۰٫۱۰ دلار)، که طبق ادعای Anthropic هزینه اکثر
+  وظایف Agentic را حدود ۲۰٪ کاهش می‌دهد. نکته عملی برای معماری چند-Agent: با
+  این فاصله قیمتی و کیفیتی، الگوی رایج «Haiku برای کارهای ساده و پرتکرار +
+  Sonnet/Opus برای تصمیم‌های پیچیده» اقتصادی‌تر از همیشه شده است.
+---
+import Callout from '../../components/content/Callout.astro';
+import StatBars from '../../components/content/StatBars.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import KeyFacts from '../../components/content/KeyFacts.astro';
+
+## برای چه مسئله‌ای ساخته شده؟
+
+نه هر کار یک Agent نیاز به قوی‌ترین و گران‌ترین مدل دارد. خلاصه‌سازی یک
+پاراگراف، دسته‌بندی یک تیکت، یا پرس‌وجوی ساده یک دیتابیس، نیازی به همان
+سطح استدلال ندارد که دیباگ یک باگ پیچیده نیاز دارد. Claude Haiku 5.5
+دقیقاً برای این دسته از کارهای پرحجم و تکراری طراحی شده — با هزینه
+به‌مراتب پایین‌تر.
+
+<KeyFacts
+  facts={[
+    { label: 'قیمت ورودی (زیر ۱۰۰ هزار توکن)', value: '۰٫۱۰ دلار به ازای هر میلیون توکن' },
+    { label: 'قیمت خروجی (زیر ۱۰۰ هزار توکن)', value: '۰٫۵۰ دلار به ازای هر میلیون توکن' },
+    { label: 'کاهش هزینه نسبت به Haiku 4.5', value: '~۷۵٪ ارزان‌تر' },
+    { label: 'ویژگی جدید', value: 'اولین مدل رده Haiku با Effort قابل‌تنظیم' },
+  ]}
+/>
+
+## جهش در بنچمارک‌ها نسبت به Haiku 4.5
+
+<StatBars
+  metric="OSWorld 2.1 (کار با کامپیوتر، زیرمجموعه آفلاین)"
+  unit="٪"
+  series={[
+    { label: 'Haiku 4.5', value: 15.7 },
+    { label: 'Haiku 5.5', value: 72.4, highlight: true },
+  ]}
+/>
+
+<StatBars
+  metric="Terminal-Bench 4.0"
+  unit="٪"
+  series={[
+    { label: 'Haiku 4.5', value: 0 },
+    { label: 'Haiku 5.5', value: 39.2, highlight: true },
+    { label: 'GPT-6 Luna', value: 16.4 },
+  ]}
+/>
+
+<Callout type="fact">
+  Haiku 5.5 در بیشتر بنچمارک‌های گزارش‌شده حتی از GPT-6 Luna (مدل رده
+  سبک OpenAI) هم جلوتر است — اما Sonnet 5.5 و Opus 5.5 همچنان برای
+  کدنویسی Agentic پیچیده به‌وضوح برتری دارند.
+</Callout>
+
+## مقایسه با بقیه خانواده Claude
+
+<ComparisonTable
+  caption="قیمت (دلار به ازای هر میلیون توکن، Promptهای زیر ۱۰۰ هزار توکن)"
+  headers={['مدل', 'ورودی', 'خروجی']}
+  rows={[
+    ['Haiku 5.5', 0.1, 0.5],
+    ['Haiku 4.5', 1.0, 5.0],
+    ['Sonnet 5.5', 2.0, 10.0],
+  ]}
+  highlightCol={1}
+/>
+
+## کاربردهای توصیه‌شده
+
+- خلاصه‌سازی و Compaction مکالمه‌های طولانی
+- پرس‌وجوی دیتابیس و دسته‌بندی حجم بالا
+- نقش Subagent در کنار Sonnet/Opus برای زیرکارهای ساده‌تر یک وظیفه کدنویسی
+- کار با مرورگر و کامپیوتر (در نسخه Beta SDKهای پایتون و TypeScript)
+- وظایف حساس به تأخیر مثل پشتیبانی زنده مشتری
+
+## یک تغییر جانبی مهم: Cache ارزان‌تر برای Sonnet 5.5
+
+<Callout type="tip">
+  هم‌زمان با این عرضه، قیمت خواندن از Cache برای Sonnet 5.5 نصف شده (از
+  ۰٫۲۰ به ۰٫۱۰ دلار به ازای هر میلیون توکن). طبق ادعای Anthropic، این
+  تغییر به‌تنهایی هزینه اکثر وظایف Agentic را حدود ۲۰٪ کاهش می‌دهد —
+  حتی اگر اصلاً از Haiku 5.5 استفاده نکنید، این تغییر قیمت ارزش بررسی
+  مجدد محاسبه هزینه Pipeline فعلی شما را دارد.
+</Callout>
+
+<Callout type="analysis">
+  نکته معماری برای تیم‌هایی که سیستم چند-Agent می‌سازند: با این فاصله
+  قیمتی (حدود ۲۰ برابر ارزان‌تر از Sonnet در ورودی) و کیفیت قابل‌قبول
+  Haiku 5.5 در کارهای ساده، الگوی «لایه‌بندی مدل» — Haiku برای حجم بالا و
+  کارهای تکراری، Sonnet/Opus فقط برای تصمیم‌های واقعاً پیچیده — از نظر
+  اقتصادی توجیه‌پذیرتر از قبل شده است.
+</Callout>

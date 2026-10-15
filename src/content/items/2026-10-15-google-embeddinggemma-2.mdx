@@ -1,0 +1,104 @@
+---
+title: "EmbeddingGemma 2: مدل Embedding چندوجهی سبک و متن‌باز"
+date: 2026-10-15
+originalDate: 2026-10-06
+source: "Google DeepMind"
+url: "https://blog.google/innovation-and-ai/technology/developers-tools/embeddinggemma-2/"
+category: "rag-knowledge-systems"
+kind: "tool"
+verified: true
+tags: ["embedding", "rag", "on-device", "open-weight", "matryoshka"]
+summary: >
+  Google DeepMind نسخه دوم EmbeddingGemma را منتشر کرد: مدل Embedding
+  چندوجهی متن‌باز (مجوز Apache 2.0) مبتنی بر معماری Gemma 4 که متن، تصویر،
+  صدا و ویدئو را در یک فضای Embedding مشترک قرار می‌دهد. کل مدل ۷۴۰ میلیون
+  پارامتر دارد اما برای کار صرفاً متنی تنها به ۲۷۰ میلیون پارامتر نیاز است
+  (رمزگذار تصویر ۱۷۰ میلیونی و صوت ۳۰۰ میلیونی اختیاری‌اند). با استفاده از
+  Matryoshka Representation Learning، بردارهای ۷۶۸بعدی را می‌توان بدون
+  بازآموزی به ۵۱۲، ۲۵۶ یا ۱۲۸ بعد کوتاه کرد (تا ۶ برابر کاهش فضای ذخیره‌سازی).
+  پنجره Context آن به ۸ هزار توکن رسیده (۴ برابر نسخه اول) و با Quantization
+  روی Pixel 11 Pro تنها حدود ۱۹۱ مگابایت RAM برای حالت متنی مصرف می‌کند. در
+  بنچمارک MTEB Code از ۶۸٫۷۶ به ۷۸٫۶۸ رسیده (نزدیک به ۱۰ امتیاز بهبود).
+  کاربرد کلیدی برای معماری RAG: اجرای کاملاً محلی و آفلاین جست‌وجوی معنایی
+  (متن، تصویر، صدا) در کنار Gemma 4 — چون هر دو مدل Tokenizer متنی و رمزگذار
+  صوتی مشترک دارند، حافظه ترکیبی کمتر می‌شود؛ هم‌چنین برای ایندکس‌کردن محلی
+  کدبیس و جست‌وجوی معنایی کد مناسب است. وزن‌ها روی Hugging Face و Kaggle در
+  دسترس‌اند و با MediaPipe، LiteRT، transformers.js، WebGPU، Ollama، llama.cpp،
+  vLLM و Qdrant سازگاری دارند — گزینه‌ای جدی برای تیم‌هایی که RAG محلی/
+  حریم‌خصوصی‌محور می‌سازند و نمی‌خواهند به API ابری Embedding وابسته باشند.
+---
+import Callout from '../../components/content/Callout.astro';
+import StatBars from '../../components/content/StatBars.astro';
+import KeyFacts from '../../components/content/KeyFacts.astro';
+
+## چیست و چه مشکلی را حل می‌کند؟
+
+مدل‌های Embedding، متن (یا تصویر، صدا، ویدئو) را به بردارهای عددی تبدیل
+می‌کنند که برای جست‌وجوی معنایی (Semantic Search) — ستون فقرات هر سیستم
+RAG — استفاده می‌شوند. اکثر مدل‌های Embedding قدرتمند فقط از طریق API
+ابری در دسترس‌اند، که برای کاربردهای حریم‌خصوصی‌محور یا کاملاً آفلاین
+مناسب نیست. EmbeddingGemma 2 مدلی وزن‌باز (مجوز Apache 2.0) و سبک است که
+می‌تواند کاملاً روی دستگاه کاربر اجرا شود — و علاوه بر متن، تصویر، صدا و
+ویدئو را هم در یک فضای Embedding مشترک قرار می‌دهد.
+
+<KeyFacts
+  facts={[
+    { label: 'معماری پایه', value: 'Gemma 4' },
+    { label: 'مجوز', value: 'Apache 2.0 (متن‌باز)' },
+    { label: 'پارامتر کل', value: '۷۴۰ میلیون' },
+    { label: 'پارامتر برای حالت فقط-متنی', value: '۲۷۰ میلیون' },
+    { label: 'پنجره Context', value: '۸ هزار توکن (۴ برابر نسخه اول)' },
+    { label: 'مصرف RAM (متنی، Pixel 11 Pro)', value: '~۱۹۱ مگابایت با Quantization' },
+  ]}
+/>
+
+## ماژولار بودن: فقط آنچه نیاز دارید را بارگذاری کنید
+
+مدل به‌صورت ماژولار طراحی شده: هسته متنی ۲۷۰ میلیون پارامتر دارد، و
+رمزگذار تصویر (۱۷۰ میلیون) و رمزگذار صدا (۳۰۰ میلیون) کاملاً اختیاری و
+جدا هستند. اگر فقط به جست‌وجوی متنی نیاز دارید، نیازی به بارگذاری کل مدل
+۷۴۰ میلیونی نیست.
+
+## کاهش فضای ذخیره‌سازی با Matryoshka Representation Learning
+
+<StatBars
+  metric="کاهش فضای ذخیره‌سازی با کوتاه‌کردن بردار (بدون بازآموزی مدل)"
+  unit="x کوچک‌تر"
+  series={[
+    { label: 'بردار ۷۶۸ بعدی (کامل)', value: 1, display: 'مبنا' },
+    { label: 'بردار ۱۲۸ بعدی', value: 6, highlight: true, display: 'تا ۶ برابر کوچک‌تر' },
+  ]}
+  note="با Matryoshka Representation Learning، همان بردار ۷۶۸بعدی را می‌توان به ۵۱۲، ۲۵۶ یا ۱۲۸ بعد کوتاه کرد — بدون نیاز به بازآموزی مدل برای هر اندازه."
+/>
+
+<StatBars
+  metric="MTEB Code (بهبود نسبت به EmbeddingGemma نسخه اول)"
+  series={[
+    { label: 'EmbeddingGemma 1', value: 68.76 },
+    { label: 'EmbeddingGemma 2', value: 78.68, highlight: true },
+  ]}
+/>
+
+## کاربرد در معماری RAG محلی
+
+<Callout type="tip">
+  اگر در حال ساخت یک سیستم RAG کاملاً محلی یا حریم‌خصوصی‌محور هستید، ترکیب
+  EmbeddingGemma 2 با مدل زبانی Gemma 4 دو مزیت مشخص دارد: اول، هر دو
+  Tokenizer متنی و رمزگذار صوتی مشترک دارند، که حافظه ترکیبی اجرای هر دو
+  مدل را کاهش می‌دهد. دوم، همین مدل برای ایندکس‌کردن محلی کدبیس و جست‌وجوی
+  معنایی کد (نه فقط متن عادی) هم مناسب است.
+</Callout>
+
+<Callout type="fact">
+  وزن‌های مدل روی Hugging Face و Kaggle در دسترس‌اند و با مجموعه وسیعی از
+  ابزارها سازگاری دارد: MediaPipe، LiteRT، transformers.js، WebGPU،
+  Ollama، llama.cpp، vLLM و Qdrant.
+</Callout>
+
+<Callout type="analysis">
+  این عرضه بخشی از روند گسترده‌تری است که بسیاری از آزمایشگاه‌های AI
+  دنبال می‌کنند: ارائه نسخه‌های سبک و وزن‌باز از مدل‌های تخصصی (نه فقط
+  مدل‌های عمومی زبانی بزرگ) برای اجرای محلی — روندی که مستقیماً به نفع
+  تیم‌هایی است که به دلایل هزینه، حریم خصوصی یا محدودیت شبکه نمی‌توانند
+  به API ابری متکی باشند.
+</Callout>

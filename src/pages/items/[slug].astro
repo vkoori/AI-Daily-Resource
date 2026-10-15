@@ -1,0 +1,20 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import { getAllItemsSorted } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const items = await getAllItemsSorted();
+  return items.map((item) => ({
+    params: { slug: item.slug },
+    props: {
+      item,
+      related: items
+        .filter((i) => i.slug !== item.slug && i.data.category === item.data.category)
+        .slice(0, 3),
+    },
+  }));
+}
+
+const { item, related } = Astro.props;
+---
+<ArticleLayout item={item} related={related} />

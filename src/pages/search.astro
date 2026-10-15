@@ -79,6 +79,7 @@ const base = import.meta.env.BASE_URL;
     summary: string;
     source: string;
     url: string;
+    slug: string;
     category: string;
     categoryLabel: string;
     tags: string[];
@@ -126,11 +127,12 @@ const base = import.meta.env.BASE_URL;
       statusEl.textContent = `${allItems.length} مطلب قابل جست‌وجو.`;
     }
 
+    const base = import.meta.env.BASE_URL;
     for (const item of filtered.slice(0, 60)) {
       const card = document.createElement('article');
       card.className = 'result-card';
       card.innerHTML = `
-        <h3><a href="${item.url}" target="_blank" rel="noopener noreferrer"></a></h3>
+        <h3><a href="${base}items/${item.slug}/"></a></h3>
         <p></p>
         <div class="result-meta">
           <span></span>

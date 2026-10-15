@@ -33,6 +33,20 @@
   --color-accent-violet: #7c4fe0;
   --color-accent-rose:   #d0417e;
 
+  /*
+    Categorical series ramp for in-article charts (StatBars etc.).
+    Fixed order — never cycled, never reassigned by filtering.
+    Validated with the dataviz skill's validate_palette.js:
+    light + dark surfaces both pass lightness band, chroma floor,
+    CVD separation and contrast. Charts always pair these with a
+    direct text label, never color alone.
+  */
+  --series-1: var(--color-brand-500);
+  --series-2: var(--color-accent-teal);
+  --series-3: var(--color-accent-amber);
+  --series-4: var(--color-accent-violet);
+  --series-5: var(--color-accent-rose);
+
   /* ---- Semantic colors (light theme default) ---- */
   --bg:            #ffffff;
   --bg-raised:     var(--color-ink-50);
@@ -106,6 +120,12 @@
     --badge-text:    var(--color-brand-200);
     --card-shadow:   0 1px 2px rgba(0, 0, 0, 0.3);
     --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+    --series-1: #5684ff;
+    --series-2: #14a890;
+    --series-3: #b8841f;
+    --series-4: #9c7bea;
+    --series-5: #e35f96;
   }
 }
 
@@ -125,4 +145,10 @@
   --badge-text:    var(--color-brand-200);
   --card-shadow:   0 1px 2px rgba(0, 0, 0, 0.3);
   --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  --series-1: #5684ff;
+  --series-2: #14a890;
+  --series-3: #b8841f;
+  --series-4: #9c7bea;
+  --series-5: #e35f96;
 }

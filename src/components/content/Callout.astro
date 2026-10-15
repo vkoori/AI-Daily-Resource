@@ -1,0 +1,67 @@
+---
+/*
+  Inline note box. Used mainly to separate the source's own claims/
+  analysis from verified facts, per the project's editorial rule, and
+  for tips/cautions. Identity is carried by an icon + visible Persian
+  label, never by color alone (status colors stay reserved).
+
+  Props:
+    type: 'fact' | 'analysis' | 'tip' | 'caution'
+    title?: overrides the default label for that type
+*/
+interface Props {
+  type: 'fact' | 'analysis' | 'tip' | 'caution';
+  title?: string;
+}
+const { type, title } = Astro.props as Props;
+const meta: Record<string, { label: string; icon: string }> = {
+  fact: { label: 'واقعیت تأییدشده', icon: '✓' },
+  analysis: { label: 'تحلیل/نظر منبع', icon: '◎' },
+  tip: { label: 'نکته کاربردی', icon: '→' },
+  caution: { label: 'نکته احتیاط', icon: '!' },
+};
+const { label, icon } = meta[type];
+---
+<aside class:list={['callout', type]} role="note" aria-label={title ?? label}>
+  <span class="icon" aria-hidden="true">{icon}</span>
+  <div class="body">
+    <p class="label">{title ?? label}</p>
+    <div class="content"><slot /></div>
+  </div>
+</aside>
+
+<style>
+  .callout {
+    display: flex;
+    gap: var(--sp-3);
+    margin: var(--sp-5) 0;
+    padding: var(--sp-4) var(--sp-5);
+    border-radius: var(--radius-md);
+    border-inline-start: 3px solid var(--border-strong);
+    background: var(--bg-raised);
+  }
+  .icon {
+    flex: none;
+    font-size: var(--fs-md);
+    line-height: 1;
+    margin-top: 0.1em;
+  }
+  .label {
+    margin: 0 0 var(--sp-1);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-transform: none;
+    color: var(--text-muted);
+  }
+  .content :global(p) { margin: 0; font-size: var(--fs-sm); line-height: var(--lh-loose); }
+  .content :global(p:not(:last-child)) { margin-bottom: var(--sp-2); }
+
+  .callout.fact { border-inline-start-color: var(--color-accent-teal); }
+  .callout.fact .icon { color: var(--color-accent-teal); }
+  .callout.analysis { border-inline-start-color: var(--color-accent-violet); }
+  .callout.analysis .icon { color: var(--color-accent-violet); }
+  .callout.tip { border-inline-start-color: var(--color-brand-500); }
+  .callout.tip .icon { color: var(--color-brand-500); }
+  .callout.caution { border-inline-start-color: var(--color-accent-amber); }
+  .callout.caution .icon { color: var(--color-accent-amber); }
+</style>

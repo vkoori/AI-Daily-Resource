@@ -1,0 +1,121 @@
+---
+/*
+  Horizontal bar comparison for a single metric across named entities
+  (models, products, versions, ...). One axis, categorical identity by
+  label (never color alone) — each bar carries its own text label and
+  value, so color is a secondary cue, not the only one.
+
+  Props:
+    metric: axis/metric name, e.g. "قیمت ورودی (دلار به ازای هر میلیون توکن)"
+    unit?:  short unit suffix appended after each value, e.g. "٪" or "دلار"
+    note?:  optional one-line caption under the chart (source/caveat)
+    series: [{ label, value, highlight? }]
+            value must be a non-negative number; highlight marks "this is
+            the subject of the article" with series-1, others cycle
+            through the fixed series-2..5 order.
+*/
+interface Bar {
+  label: string;
+  value: number;
+  display?: string; // pre-formatted value text; falls back to `${value}${unit}`
+  highlight?: boolean;
+}
+interface Props {
+  metric: string;
+  unit?: string;
+  note?: string;
+  series: Bar[];
+}
+const { metric, unit = '', note, series } = Astro.props as Props;
+const max = Math.max(...series.map((s) => s.value), 1);
+
+// Fixed categorical order: the highlighted entity always takes series-1;
+// the rest keep a stable order from series-2 onward (never reassigned
+// by sorting/filtering elsewhere on the page).
+let nextSlot = 2;
+const colored = series.map((s) => {
+  const slot = s.highlight ? 1 : nextSlot++ > 5 ? ((nextSlot - 2) % 4) + 2 : nextSlot - 1;
+  return { ...s, slot };
+});
+---
+<figure class="statbars">
+  <figcaption class="metric-label">{metric}</figcaption>
+  <div class="bars" role="img" aria-label={`نمودار مقایسه ${metric}: ${series.map((s) => `${s.label} ${s.display ?? s.value + unit}`).join('، ')}`}>
+    {colored.map((bar) => {
+      const pct = Math.max((bar.value / max) * 100, 2);
+      return (
+        <div class="bar-row">
+          <span class="bar-entity">{bar.label}</span>
+          <div class="bar-track">
+            <div
+              class="bar-fill"
+              style={`width:${pct}%; --series: var(--series-${bar.slot});`}
+              title={`${bar.label}: ${bar.display ?? bar.value + unit}`}
+            ></div>
+          </div>
+          <span class="bar-value ltr">{bar.display ?? `${bar.value}${unit}`}</span>
+        </div>
+      );
+    })}
+  </div>
+  {note && <p class="note">{note}</p>}
+</figure>
+
+<style>
+  .statbars {
+    margin: var(--sp-6) 0;
+    padding: var(--sp-5);
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  .metric-label {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--sp-4);
+    text-align: start;
+  }
+  .bars { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .bar-row {
+    display: grid;
+    grid-template-columns: minmax(6rem, 10rem) 1fr auto;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .bar-entity {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bar-track {
+    background: var(--bg-sunken);
+    border-radius: var(--radius-pill);
+    height: 0.75rem;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--series);
+    border-radius: var(--radius-pill);
+    transition: width var(--transition-base);
+  }
+  .bar-value {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 3.5rem;
+    text-align: end;
+  }
+  .note {
+    margin: var(--sp-3) 0 0;
+    font-size: var(--fs-xs);
+    color: var(--text-faint);
+  }
+  @media (max-width: 560px) {
+    .bar-row { grid-template-columns: 1fr; gap: var(--sp-1); }
+    .bar-value { text-align: start; }
+  }
+</style>

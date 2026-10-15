@@ -1,0 +1,182 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import CategoryBadge from '../components/CategoryBadge.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import KeyFacts from '../components/content/KeyFacts.astro';
+import {
+  formatPersianDate,
+  formatIsoDate,
+  categoryLabel,
+  estimateReadingTime,
+  type Item,
+} from '../utils/content';
+
+interface Props {
+  item: Item;
+  related: Item[];
+}
+const { item, related } = Astro.props as Props;
+const { title, source, url, category, tags, kind, verified, date, originalDate, summary } =
+  item.data;
+const { Content } = await item.render();
+const base = import.meta.env.BASE_URL;
+const readingMinutes = estimateReadingTime(item.body ?? '');
+
+const kindLabels: Record<string, string> = {
+  news: 'خبر',
+  technique: 'تکنیک',
+  tool: 'ابزار',
+  paper: 'مقاله',
+  reference: 'مرجع',
+  'case-study': 'مطالعه موردی',
+};
+
+const facts = [
+  { label: 'منبع', value: `<span>${source}</span>` },
+  {
+    label: 'لینک مستقیم',
+    value: `<a class="ltr" href="${url}" target="_blank" rel="noopener noreferrer">${new URL(url).hostname}</a>`,
+  },
+  { label: 'دسته‌بندی', value: `<a href="${base}category/${category}/">${categoryLabel(category).fa}</a>` },
+  { label: 'نوع محتوا', value: kindLabels[kind ?? 'news'] ?? kind ?? '' },
+  {
+    label: originalDate ? 'تاریخ انتشار اصلی' : 'تاریخ انتشار',
+    value: `<time class="ltr" datetime="${formatIsoDate(originalDate ?? date)}">${formatPersianDate(originalDate ?? date)}</time>`,
+  },
+  ...(verified ? [{ label: 'اعتبارسنجی', value: '✓ تأیید‌شده با منبع رسمی/اولیه' }] : []),
+];
+---
+<BaseLayout title={`${title} · دیجست روزانه هوش مصنوعی`} description={summary}>
+  <article class="article container">
+    <a class="back" href={`${base}category/${category}/`}>← {categoryLabel(category).fa}</a>
+
+    <header class="article-head">
+      <div class="head-badges">
+        <CategoryBadge slug={category} size="sm" />
+        <span class="kind-chip">{kindLabels[kind ?? 'news'] ?? kind}</span>
+        <span class="reading-time">{readingMinutes} دقیقه مطالعه</span>
+      </div>
+      <h1>{title}</h1>
+      <p class="lede">{summary}</p>
+    </header>
+
+    <KeyFacts facts={facts} />
+
+    <div class="prose body">
+      <Content />
+    </div>
+
+    <footer class="article-footer">
+      <a class="source-btn ltr" href={url} target="_blank" rel="noopener noreferrer">
+        مشاهده منبع اصلی ↗ <span class="host">{new URL(url).hostname}</span>
+      </a>
+      {tags && tags.length > 0 && (
+        <ul class="tag-list" aria-label="برچسب‌ها">
+          {tags.map((t: string) => <li class="ltr">{t}</li>)}
+        </ul>
+      )}
+    </footer>
+  </article>
+
+  {related.length > 0 && (
+    <section class="container related">
+      <h2>مطالب مرتبط در همین دسته</h2>
+      <div class="grid">
+        {related.map((r) => <ArticleCard item={r} />)}
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .article { padding-block: var(--sp-6) var(--sp-7); max-width: var(--content-width); }
+  .back { font-size: var(--fs-sm); color: var(--text-muted); }
+
+  .article-head { margin: var(--sp-5) 0 var(--sp-6); }
+  .head-badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-4);
+  }
+  .kind-chip {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: var(--sp-1) var(--sp-3);
+  }
+  .reading-time {
+    font-size: var(--fs-xs);
+    color: var(--text-faint);
+    margin-inline-start: auto;
+  }
+  .article-head h1 { font-size: var(--fs-2xl); margin-bottom: var(--sp-3); }
+  .lede {
+    font-size: var(--fs-md);
+    color: var(--text-muted);
+    line-height: var(--lh-loose);
+    margin: 0;
+  }
+
+  .body { font-size: var(--fs-base); line-height: var(--lh-loose); }
+  .body :global(h2) { margin-top: var(--sp-7); font-size: var(--fs-xl); }
+  .body :global(h3) { margin-top: var(--sp-6); font-size: var(--fs-lg); }
+  .body :global(p) { margin: 0 0 var(--sp-4); }
+  .body :global(ul), .body :global(ol) { margin: 0 0 var(--sp-5); }
+  .body :global(li) { margin-bottom: var(--sp-2); line-height: var(--lh-loose); }
+  .body :global(strong) { color: var(--text); }
+  .body :global(blockquote) {
+    margin: var(--sp-5) 0;
+    padding-inline-start: var(--sp-4);
+    border-inline-start: 3px solid var(--border-strong);
+    color: var(--text-muted);
+  }
+
+  .article-footer {
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+  .source-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-5);
+    background: var(--color-brand-500);
+    color: #fff;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+  }
+  .source-btn:hover { background: var(--color-brand-600); color: #fff; text-decoration: none; }
+  .source-btn .host { opacity: 0.85; font-weight: 400; }
+  .tag-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .tag-list li {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    background: var(--bg-sunken);
+    border-radius: var(--radius-sm);
+    padding: 0.15rem var(--sp-2);
+  }
+
+  .related { padding-block: var(--sp-7); max-width: var(--page-width); }
+  .related h2 { font-size: var(--fs-lg); margin-bottom: var(--sp-5); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--sp-5);
+  }
+</style>

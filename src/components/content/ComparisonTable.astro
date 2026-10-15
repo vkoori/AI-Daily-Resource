@@ -1,0 +1,86 @@
+---
+/*
+  A plain, responsive, RTL-safe table for multi-column comparisons
+  (pricing tiers, feature matrices, pros/cons). Serves as the
+  "table view" alternative to any chart on the same page, per the
+  dataviz skill's accessibility pass.
+
+  Props:
+    caption: table caption/title
+    headers: string[]  — first header is usually the row-label column
+    rows: (string | number)[][]
+    highlightCol?: number — zero-based column index to visually emphasize
+                            (e.g. "this model" in a comparison table)
+*/
+interface Props {
+  caption: string;
+  headers: string[];
+  rows: (string | number)[][];
+  highlightCol?: number;
+}
+const { caption, headers, rows, highlightCol } = Astro.props as Props;
+---
+<figure class="comparison-table">
+  <figcaption>{caption}</figcaption>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          {headers.map((h, i) => <th class:list={[{ hl: i === highlightCol }]}>{h}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr>
+            {row.map((cell, i) => (
+              <td class:list={[{ hl: i === highlightCol }]}>
+                {typeof cell === 'number' ? <span class="ltr">{cell}</span> : cell}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</figure>
+
+<style>
+  .comparison-table {
+    margin: var(--sp-6) 0;
+  }
+  figcaption {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--sp-3);
+  }
+  .scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+  }
+  th, td {
+    padding: var(--sp-3) var(--sp-4);
+    text-align: start;
+    white-space: nowrap;
+  }
+  thead th {
+    background: var(--bg-sunken);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: var(--fs-xs);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+  tbody tr:hover { background: var(--bg-raised); }
+  th.hl, td.hl {
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    font-weight: 600;
+  }
+</style>

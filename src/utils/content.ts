@@ -47,3 +47,10 @@ export function formatPersianDate(d: Date): string {
 export function formatIsoDate(d: Date): string {
   return dateKey(d);
 }
+
+// Rough Persian-reading-speed estimate (~160 words/minute for mixed
+// Persian/English technical prose), rounded up, minimum 1.
+export function estimateReadingTime(body: string): number {
+  const words = body.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 160));
+}

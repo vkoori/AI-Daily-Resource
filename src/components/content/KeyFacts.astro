@@ -1,0 +1,61 @@
+---
+/*
+  At-a-glance fact panel — the "infobox" pattern from reference/wiki
+  articles. Sits at the top of an article body and gives the reader
+  the key facts before they commit to reading the full explainer.
+
+  Props:
+    facts: [{ label, value }]  — value may contain simple markup via
+                                  a raw HTML string (kept minimal/trusted:
+                                  authored only by the daily pipeline).
+*/
+interface Fact {
+  label: string;
+  value: string;
+}
+interface Props {
+  facts: Fact[];
+}
+const { facts } = Astro.props as Props;
+---
+<dl class="key-facts">
+  {facts.map((f) => (
+    <div class="row">
+      <dt>{f.label}</dt>
+      <dd set:html={f.value} />
+    </div>
+  ))}
+</dl>
+
+<style>
+  .key-facts {
+    margin: 0 0 var(--sp-6);
+    padding: var(--sp-5);
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    display: grid;
+    gap: var(--sp-3);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: var(--sp-3);
+    align-items: baseline;
+  }
+  dt {
+    margin: 0;
+    font-size: var(--fs-xs);
+    color: var(--text-faint);
+    font-weight: 600;
+  }
+  dd {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text);
+  }
+  dd :global(a) { color: var(--link); }
+  @media (max-width: 560px) {
+    .row { grid-template-columns: 1fr; gap: var(--sp-1); }
+  }
+</style>

@@ -1,0 +1,94 @@
+---
+/*
+  Numbered flow/process diagram — "how it works" in N connected steps,
+  or a chronological sequence of events. Neutral styling (not a data
+  chart, so no series color): identity comes from the step number and
+  title text, never color alone.
+
+  Props:
+    title?: optional heading above the diagram
+    steps: [{ title, body }]
+*/
+interface Step {
+  title: string;
+  body: string;
+}
+interface Props {
+  title?: string;
+  steps: Step[];
+}
+const { title, steps } = Astro.props as Props;
+---
+<figure class="process">
+  {title && <figcaption>{title}</figcaption>}
+  <ol class="steps">
+    {steps.map((step, i) => (
+      <li class="step">
+        <span class="num" aria-hidden="true">{i + 1}</span>
+        <div class="step-body">
+          <h4>{step.title}</h4>
+          <p>{step.body}</p>
+        </div>
+      </li>
+    ))}
+  </ol>
+</figure>
+
+<style>
+  .process {
+    margin: var(--sp-6) 0;
+  }
+  figcaption {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--sp-4);
+  }
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: var(--sp-4);
+    position: relative;
+    padding-bottom: var(--sp-5);
+  }
+  .step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(1.25rem - 1px);
+    top: 2.5rem;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .num {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg-sunken);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+  .step-body h4 {
+    margin: 0 0 var(--sp-1);
+    font-size: var(--fs-md);
+  }
+  .step-body p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-loose);
+  }
+</style>
