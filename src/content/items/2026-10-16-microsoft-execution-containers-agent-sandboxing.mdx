@@ -1,0 +1,79 @@
+---
+title: "Microsoft Execution Containers: محدودسازی Agentهای AI با Policy در سطح سیستم‌عامل، نه در سطح مدل"
+date: 2026-10-16
+originalDate: 2026-10-07
+source: "Microsoft"
+url: "https://blogs.windows.com/windowsdeveloper/2026/10/07/microsoft-execution-containers-policy-driven-containment-for-ai-agents/"
+category: "security-safety-governance"
+kind: "tool"
+verified: true
+tags: ["microsoft", "windows", "agent-security", "sandboxing", "mxc", "open-source"]
+summary: >
+  Microsoft نسخه عمومی (GA) «Microsoft Execution Containers» (به‌اختصار MXC)
+  را برای ویندوز، macOS و لینوکس منتشر کرد: یک لایهٔ محدودسازی مبتنی بر
+  Policy که مشخص می‌کند یک Agent هوش مصنوعی دقیقاً به چه فایل‌ها، چه آدرس‌های
+  شبکه و چه بخش‌های رابط کاربری دسترسی دارد — و این محدودیت را خودِ سیستم‌عامل
+  اجرا می‌کند، نه خودِ مدل. استدلال اصلی تیم ویندوز این است که آموزش Alignment
+  به‌تنهایی کافی نیست تا از دور زدن محدودیت‌ها توسط یک Agent (عمدی یا تصادفی)
+  جلوگیری کند؛ پس اجرای محدودیت باید بیرون از مدل و مستقل از رفتار آن باشد.
+  کد MXC با لایسنس MIT و به‌صورت متن‌باز روی GitHub منتشر شده است.
+---
+import Callout from '../../components/content/Callout.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import KeyFacts from '../../components/content/KeyFacts.astro';
+
+## چه مشکلی را حل می‌کند؟
+
+Agentهای AI که به فایل‌سیستم، شبکه و اپلیکیشن‌های دیگر دسترسی دارند، یک
+سطح حملهٔ تازه ایجاد می‌کنند: چه از طریق Prompt Injection و چه به‌خاطر خطای
+خودِ مدل، یک Agent ممکن است به فایل یا سروری دسترسی پیدا کند که قرار نبوده.
+راه‌حل رایج تا امروز عمدتاً «آموزش دادن» به مدل بود (Alignment، دستورالعمل
+System Prompt)، اما این روش یک محدودیت اساسی دارد: تصمیم محدودسازی داخل
+همان فرایندی گرفته می‌شود که می‌خواهیم محدودش کنیم. تیم Windows Platform
+با MXC این مرز را به بیرون از مدل منتقل می‌کند.
+
+<KeyFacts
+  facts={[
+    { label: 'نام ابزار', value: 'Microsoft Execution Containers (MXC)' },
+    { label: 'تاریخ GA', value: '۷ اکتبر ۲۰۲۶' },
+    { label: 'پلتفرم‌ها', value: 'Windows، macOS، Linux' },
+    { label: 'لایسنس', value: 'متن‌باز، MIT (مخزن github.com/microsoft/mxc)' },
+    { label: 'نحوهٔ تعریف محدودیت', value: 'Policy با فرمت JSON (فایل، شبکه، عناصر UI)' },
+  ]}
+/>
+
+## چگونه کار می‌کند؟
+
+<ProcessSteps
+  title="جریان کار MXC برای محدودسازی یک Agent"
+  steps={[
+    { title: 'تعریف Policy', body: 'توسعه‌دهنده در یک فایل JSON مشخص می‌کند Agent دقیقاً به کدام فایل‌ها، کدام دامنه‌های شبکه و کدام عناصر رابط کاربری اجازهٔ دسترسی دارد.' },
+    { title: 'اجرای محدودیت توسط سیستم‌عامل', body: 'به‌جای تکیه بر خودِ مدل، MXC از قابلیت‌های Isolation بومی هر سیستم‌عامل (Windows، macOS، Linux) برای اعمال این Policy استفاده می‌کند.' },
+    { title: 'استقلال از رفتار مدل', body: 'حتی اگر Agent به‌خاطر Prompt Injection یا خطا بخواهد از مرزهای تعیین‌شده عبور کند، سیستم‌عامل درخواست را مستقل از «نیت» مدل مسدود می‌کند.' },
+  ]}
+/>
+
+<Callout type="fact">
+  نکات تأییدشده: تاریخ GA (۷ اکتبر ۲۰۲۶)، اعلام رسمی توسط Logan Iyer (معاون
+  شرکت در واحد Windows Platform + Developer) در بلاگ رسمی Windows Developer،
+  پوشش سه سیستم‌عامل اصلی، و انتشار متن‌باز با لایسنس MIT.
+</Callout>
+
+<Callout type="analysis">
+  استدلال اصلی مایکروسافت — که «Alignment به‌تنهایی برای مهار Agentها کافی
+  نیست» — یک موضع صنعتی رو به رشد است (آزمایشگاه‌هایی مثل Anthropic هم در
+  مطالب مهندسی خود مفهوم «Containment در سطح سیستم» را مطرح کرده‌اند)، اما
+  این جمله بیشتر استدلال طراحی تیم مایکروسافت است تا یک یافتهٔ تجربی
+  مستقل‌سنجی‌شده در همین پست.
+</Callout>
+
+## چه زمانی باید از این الگو استفاده کرد؟
+
+<Callout type="tip">
+  اگر در حال ساخت یک Agent هستید که به فایل‌سیستم محلی، مرورگر یا شبکهٔ کاربر
+  دسترسی دارد (نه فقط یک API متنی)، تعریف محدودیت دسترسی را از همان ابتدا
+  در سطح سیستم‌عامل یا Sandbox طراحی کنید، نه فقط در System Prompt. MXC یک
+  نمونهٔ آمادهٔ متن‌باز برای این الگو است؛ حتی اگر از خودِ MXC استفاده نکنید،
+  ایدهٔ «Policy جدا از مدل، اجراشده توسط یک لایهٔ مستقل» را می‌توان با ابزارهای
+  مشابه (مثل Sandbox کانتینری یا پروفایل‌های دسترسی سیستم‌عامل) هم پیاده کرد.
+</Callout>

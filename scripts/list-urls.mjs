@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Prints every source URL already present in src/content/items/*.md, one per
-// line. The daily pipeline greps this output before adding a new entry, so a
-// URL already covered is skipped (or only re-added when something material
-// changed), per the project's "no duplicate URLs" rule.
+// Prints every source URL already present in src/content/items/*.md or
+// *.mdx, one per line. The daily pipeline greps this output before adding
+// a new entry, so a URL already covered is skipped (or only re-added when
+// something material changed), per the project's "no duplicate URLs" rule.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,7 @@ const itemsDir = join(__dirname, '..', 'src', 'content', 'items');
 
 let files = [];
 try {
-  files = readdirSync(itemsDir).filter((f) => f.endsWith('.md'));
+  files = readdirSync(itemsDir).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'));
 } catch {
   process.exit(0); // no content yet
 }
