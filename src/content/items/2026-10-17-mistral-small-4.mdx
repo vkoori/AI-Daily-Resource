@@ -1,0 +1,89 @@
+---
+title: "Mistral Small 4: یک مدل برای جای سه مدل — یکپارچه‌سازی استدلال، چندوجهی و کدنویسی Agentic"
+date: 2026-10-17
+originalDate: 2026-03-16
+source: "Mistral AI"
+url: "https://mistral.ai/news/mistral-small-4/"
+category: "ai-models-research"
+kind: "reference"
+verified: true
+tags: ["mistral", "mistral-small-4", "moe", "multimodal", "open-weights", "agentic-coding"]
+summary: >
+  Mistral Small 4 اولین مدل خانوادهٔ Small از Mistral AI است که به‌گفتهٔ
+  خودِ شرکت، قابلیت‌های سه مدل تخصصی قبلی‌شان — Magistral (استدلال)،
+  Pixtral (چندوجهی) و Devstral (کدنویسی Agentic) — را در یک مدل Mixture-of-
+  Experts با ۱۱۹ میلیارد پارامتر کل و ۶ میلیارد پارامتر فعال یکپارچه می‌کند.
+  مدل با پارامتر `reasoning_effort` بین پاسخ سریع و استدلال گام‌به‌گام سوئیچ
+  می‌کند، با مجوز Apache 2.0 منتشر شده و روی Hugging Face، vLLM، llama.cpp،
+  SGLang و NIM اجرا می‌شود. تمام اعداد بنچمارک (مقایسه با GPT-OSS 120B و
+  Qwen) ادعای خودِ Mistral است و منبع این مطلب هیچ مقایسه‌ای با Mistral
+  Large 4 ارائه نداده است.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این مدل چیست و چه مشکلی را حل می‌کند؟
+
+تا پیش از این، اگر تیمی هم به یک مدل سریع برای چت معمولی، هم یک مدل با
+استدلال گام‌به‌گام، هم یک مدل چندوجهی برای تحلیل تصویر، و هم یک مدل تخصصی
+برای کدنویسی Agentic نیاز داشت، باید بین چند مدل جدا از خانوادهٔ Mistral
+(Magistral، Pixtral، Devstral، Mistral Small) سوئیچ می‌کرد. Mistral Small 4
+این چهار توانایی را در یک مدل واحد ترکیب می‌کند — به‌گفتهٔ Mistral، اولین
+مدل Small آن‌ها با این ویژگی.
+
+<KeyFacts
+  facts={[
+    { label: 'معماری', value: 'Hybrid Mixture-of-Experts — ۱۱۹B پارامتر کل، ۶B فعال (۸B با Embedding/Output)' },
+    { label: 'تعداد Experts', value: '۱۲۸ کل، ۴ فعال در هر توکن' },
+    { label: 'پنجرهٔ Context', value: '۲۵۶ هزار توکن' },
+    { label: 'مجوز', value: 'Apache 2.0 (متن‌باز، قابل Fine-tune)' },
+    { label: 'قیمت API', value: 'ورودی ۰.۱۵ دلار / خروجی ۰.۶۰ دلار به ازای هر میلیون توکن' },
+  ]}
+/>
+
+## چگونه کار می‌کند: یک پارامتر برای سوئیچ بین «سریع» و «استدلالی»
+
+پارامتر `reasoning_effort` تعیین می‌کند مدل چگونه پاسخ بدهد: مقدار `"none"`
+پاسخ سریع و مشابه Mistral Small 3.2 قبلی می‌دهد، و مقدار `"high"` حالت
+استدلال گام‌به‌گام با سطح توضیح مشابه مدل‌های قبلی خانوادهٔ Magistral را
+فعال می‌کند. توانایی چندوجهی (ورودی تصویر برای تحلیل سند و تصویر) از Pixtral
+و تمرکز روی کدنویسی/جست‌وجوی کدبیس/Workflowهای Agentic از Devstral به ارث
+رسیده است.
+
+## بنچمارک‌ها: ادعای Mistral در برابر GPT-OSS 120B
+
+<ComparisonTable
+  caption="مقایسهٔ گزارش‌شده توسط Mistral — این اعداد مستقل تایید نشده‌اند"
+  headers={['معیار', 'Mistral Small 4', 'GPT-OSS 120B']}
+  rows={[
+    ['AA LCR (امتیاز)', '۰.۷۲ با ~۱۶۰۰ کاراکتر خروجی', 'برای امتیاز مشابه، ۳.۵ تا ۴ برابر خروجی بیشتر لازم دارد'],
+    ['LiveCodeBench', 'برتر، با ~۲۰٪ خروجی کمتر', 'پایه مقایسه'],
+    ['هر سه معیار (با reasoning فعال)', 'هم‌سطح یا برتر', 'پایه مقایسه'],
+  ]}
+/>
+
+<Callout type="caution">
+  این اعداد از گزارش رسمی Mistral گرفته شده و بدون تایید شخص ثالث است. منبع
+  این مطلب هیچ مقایسه‌ای با Mistral Large 4 (که پیش‌تر در همین آرشیو پوشش
+  داده شده) ارائه نمی‌دهد؛ تنها رقبای نام‌برده‌شده GPT-OSS 120B و خانوادهٔ
+  Qwen هستند.
+</Callout>
+
+## عملکرد و زیرساخت
+
+Mistral دو حالت استقرار متفاوت گزارش می‌کند: پیکربندی بهینه‌شده برای تاخیر
+(Latency) با حدود ۴۰٪ کاهش زمان کامل‌شدن پاسخ، و پیکربندی بهینه‌شده برای
+گذردهی (Throughput) با حدود ۳ برابر افزایش تعداد درخواست در ثانیه نسبت به
+Mistral Small 3. حداقل سخت‌افزار پیشنهادی ۴ کارت NVIDIA HGX H100 یا معادل آن
+است (یا ۱ DGX B200 برای حداقل، ۲ برای حالت پیشنهادی).
+
+<Callout type="tip">
+  مدل روی Mistral API/AI Studio، Hugging Face، و build.nvidia.com (با
+  پشتیبانی NIM از روز انتشار) در دسترس است و روی vLLM، llama.cpp، SGLang و
+  Transformers هم اجرا می‌شود — یعنی برای تیم‌هایی که می‌خواهند بین یک مدل
+  سریع و یک مدل استدلالی سوئیچ کنند بدون نگه‌داشتن چند Endpoint جدا، گزینهٔ
+  عملی‌ای است؛ اما چون این مطلب نسبت به تاریخ انتشار حدود هفت ماه قدمت دارد،
+  پیش از استفاده بررسی کنید که آیا مدل جدیدتری از همین خانواده منتشر شده یا نه.
+</Callout>

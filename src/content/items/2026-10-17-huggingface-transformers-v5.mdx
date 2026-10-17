@@ -1,0 +1,106 @@
+---
+title: "Transformers v5: پنج سال بعد، Hugging Face کتابخانهٔ مرجع تعریف مدل را بازطراحی کرد"
+date: 2026-10-17
+originalDate: 2025-12-01
+source: "Hugging Face"
+url: "https://huggingface.co/blog/transformers-v5"
+category: "ai-coding-dev-tools"
+kind: "reference"
+verified: true
+tags: ["transformers", "huggingface", "pytorch", "library", "mlops"]
+summary: >
+  Hugging Face نسخهٔ ۵ کتابخانهٔ Transformers را به‌صورت Release Candidate
+  منتشر کرد — پنج سال پس از نسخهٔ ۴. تغییر اصلی این است که کتابخانه حالا
+  فقط از PyTorch پشتیبانی می‌کند (پایان پشتیبانی از Flax و TensorFlow)،
+  تمایز Tokenizer «سریع/آهسته» حذف شده، یک AttentionInterface واحد
+  پیاده‌سازی‌های Attention را یکپارچه می‌کند، و قابلیت‌های Serving/Batching
+  پیوسته و Quantization به‌عنوان قابلیت درجه‌یک اضافه شده‌اند. اعداد رشد
+  اکوسیستم (نصب روزانه، تعداد معماری، Checkpoint سازگار) ادعای خودِ Hugging
+  Face است، نه عدد مستقل بنچمارک‌شده؛ مقاله هیچ عدد سرعت/حافظهٔ مقایسه‌ای
+  بین v4 و v5 ارائه نمی‌دهد.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چرا مهم است؟
+
+کتابخانهٔ Transformers هسته‌ای است که اکثر مدل‌های متن‌باز روی Hugging Face
+Hub بر اساس آن تعریف می‌شوند — از تعریف معماری تا بارگذاری Checkpoint. نسخهٔ
+۴ این کتابخانه در نوامبر ۲۰۲۰ منتشر شد؛ نسخهٔ ۵ (به‌صورت `v5.0.0rc0`) اولین
+بازطراحی بزرگ بعد از پنج سال است و هدفش هم‌راستا نگه‌داشتن کتابخانه با
+نیازهای فعلی آموزش، Inference و استقرار در Production است.
+
+<KeyFacts
+  facts={[
+    { label: 'نوع انتشار', value: 'Release Candidate (`v5.0.0rc0`)' },
+    { label: 'فاصله از v4', value: 'حدود ۵ سال (v4 RC در نوامبر ۲۰۲۰)' },
+    { label: 'تغییر بزرگ‌ترین', value: 'پایان پشتیبانی Flax و TensorFlow — فقط PyTorch' },
+    { label: 'نویسندگان', value: 'تیم Hugging Face (Lysandre، Arthur Zucker، Cyril Vallez، Vaibhav Srivastav)' },
+  ]}
+/>
+
+## چه چیزی واقعاً تغییر کرده است
+
+<ProcessSteps
+  title="محورهای اصلی بازطراحی"
+  steps={[
+    {
+      title: 'سادگی و نگهداری مدل‌ها',
+      body: 'طراحی «Modular» به مدل‌ها اجازه می‌دهد اجزای مشترک را به اشتراک بگذارند (کاهش حجم کد لازم برای افزودن/بازبینی یک مدل). یک AttentionInterface واحد، پیاده‌سازی‌های Attention (مثل نسخه‌های FlashAttention، FlexAttention، SDPA) را یکپارچه می‌کند.',
+    },
+    {
+      title: 'یکپارچه‌سازی Tokenizer',
+      body: 'تمایز «Fast در برابر Slow» حذف شده؛ Backend کتابخانهٔ tokenizers حالا پیش‌فرض است (با SentencePiece و MistralCommon به‌عنوان جایگزین غیرپیش‌فرض). پردازشگرهای تصویر فقط به‌صورت Fast (مبتنی بر torchvision) باقی می‌مانند.',
+    },
+    {
+      title: 'آموزش در مقیاس',
+      body: 'Pre-training در مقیاس بزرگ حالا پشتیبانی می‌شود؛ این نیاز به بازنویسی Initialization مدل، پشتیبانی از Parallelism، و بهینه‌سازی Kernelهای Forward/Backward داشت. سازگاری با torchtitan، Megatron و nanotron در حال گسترش است.',
+    },
+    {
+      title: 'Inference و Production',
+      body: 'Continuous Batching و Paged Attention اضافه شده؛ `transformers serve` یک سرور جدید سازگار با API اوپن‌ای‌آی است. Hugging Face صریحاً می‌گوید هدفش رقابت مستقیم با موتورهایی مثل vLLM، SGLang یا TensorRT-LLM نیست، بلکه سازگاری با آن‌ها.',
+    },
+  ]}
+/>
+
+<Callout type="caution">
+  مهم‌ترین تغییر Breaking این نسخه، پایان پشتیبانی از Flax و TensorFlow است؛
+  از این پس PyTorch تنها Backend پشتیبانی‌شده است (با کار در جریان برای
+  سازگاری جانبی با اکوسیستم JAX). اگر پروژه‌ای روی Flax/TF با این کتابخانه
+  بنا شده، این یک نقطهٔ توقف واقعی برای ارتقا به v5 است.
+</Callout>
+
+## اعداد رشد اکوسیستم: v4 در برابر v5
+
+<ComparisonTable
+  caption="ادعاهای Hugging Face دربارهٔ رشد کتابخانه (گزارش‌شده توسط خودِ تیم، نه بنچمارک مستقل)"
+  headers={['معیار', 'در زمان v4 (۲۰۲۰)', 'در زمان v5 (۲۰۲۵)']}
+  rows={[
+    ['نصب روزانه از طریق pip', '~۲۰,۰۰۰', 'بیش از ۳,۰۰۰,۰۰۰'],
+    ['مجموع نصب‌های تاریخی', '—', 'بیش از ۱.۲ میلیارد'],
+    ['تعداد معماری پشتیبانی‌شده', '~۴۰', 'بیش از ۴۰۰'],
+    ['Checkpoint سازگار در Hub', '~۱,۰۰۰', 'بیش از ۷۵۰,۰۰۰'],
+  ]}
+/>
+
+<Callout type="analysis">
+  این آمار رشد نصب و تعداد معماری، ادعای خودِ Hugging Face در پست وبلاگشان
+  است و منبع مستقلی برای تایید آن ذکر نشده. مهم‌تر از آن: مقاله **هیچ عدد
+  مقایسه‌ای برای سرعت Inference، توان آموزش یا مصرف حافظه بین v4 و v5 ارائه
+  نمی‌دهد** — ادعاهایی مثل «کد، خودِ محصول است» یا توصیف v5 به‌عنوان «یک
+  دستاورد و یک وعده»، چارچوب‌بندی و لحن تیم نویسنده است، نه یافتهٔ کمّی.
+  بخش‌های متعددی از جمله ابزار تشخیص خودکار شباهت معماری جدید و برخی راهنمای
+  Continuous Batching هم هنوز «در حال توسعه» اعلام شده‌اند، نه تکمیل‌شده.
+</Callout>
+
+## چرا برای مهندسان AI اهمیت دارد
+
+Quantization در این نسخه به یک قابلیت «درجه‌یک» تبدیل شده (نه یک افزونهٔ
+جانبی)، و مدل‌ها از فایل‌های GGUF برای Fine-tuning قابل بارگذاری‌اند و در
+جهت معکوس هم به GGUF (برای llama.cpp) و MLX (از طریق safetensors) قابل تبدیل‌اند.
+برای تیم‌هایی که از Transformers برای تعریف مدل و از موتورهای دیگر برای
+Serving استفاده می‌کنند، این یعنی یک مسیر رسمی‌تر و یکپارچه‌تر بین «تعریف
+مدل» و «اجرای آن در Production» — دقیقاً همان شکافی که نسخهٔ ۴ نداشت.
