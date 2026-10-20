@@ -1,0 +1,94 @@
+---
+title: "Claude Marketplace: یک درگاه واحد برای Pluginها، Agentهای شریک و پیمانکاران استقرار AI"
+date: 2026-10-20
+originalDate: 2026-09-23
+source: "Anthropic / Claude"
+url: "https://claude.com/blog/claude-marketplace"
+category: "ai-coding-dev-tools"
+kind: "reference"
+verified: true
+tags: ["anthropic", "claude-marketplace", "mcp", "agent-skills", "plugins", "ecosystem"]
+summary: >
+  Anthropic در ۲۳ سپتامبر ۲۰۲۶ Claude Marketplace را راه‌اندازی کرد: یک
+  درگاه واحد که سه نوع محتوا را کنار هم قرار می‌دهد — بیش از ۲۰۰۰ Plugin و
+  Connector (از شرکت‌هایی مثل Atlassian، Google، Microsoft، Notion و
+  Salesforce)، محصولات و Agentهای مبتنی بر Claude از شرکت‌های شریک (مثل
+  CrowdStrike، Cursor، Harvey، Legora، Lovable و Snowflake)، و شبکه
+  مشاوران/پیمانکاران استقرار (مثل Accenture، BCG و Deloitte). این مطلب با
+  نزدیک به یک ماه تأخیر نسبت به تاریخ انتشار اصلی، به‌عنوان محتوای مرجع در
+  آرشیو ثبت می‌شود چون زیرساخت اکوسیستمی مهمی برای توسعه‌دهندگانی است که با
+  MCP یا Agent Skills کار می‌کنند.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import Callout from '../../components/content/Callout.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+
+## این موضوع چیست و چرا مطرح شده؟
+
+تا پیش از این، اگر یک تیم می‌خواست ببیند چه ابزارهایی با Claude کار
+می‌کنند — یک Connector برای Notion، یک Agent آماده برای تحلیل قرارداد
+حقوقی، یا یک شرکت مشاوره برای کمک به استقرار سازمانی — باید در منابع پراکنده
+جست‌وجو می‌کرد. **Claude Marketplace** این سه نوع نیاز متفاوت را در یک
+محل جمع می‌کند. اهمیت آن برای توسعه‌دهندگان این است که مسیر رسمی و واحدی
+برای عرضه ابزار خودشان به کاربران موجود Claude فراهم می‌کند، و برای تیم‌های
+فنی این است که پیدا کردن و امتحان کردن ابزارهای آماده را ساده‌تر می‌کند.
+
+<KeyFacts
+  facts={[
+    { label: 'تاریخ راه‌اندازی', value: '۲۳ سپتامبر ۲۰۲۶' },
+    { label: 'تعداد Plugin/Connector', value: 'بیش از ۲۰۰۰' },
+    { label: 'نمونه شرکای Connector', value: 'Atlassian، Google، Microsoft، Notion، Salesforce' },
+    { label: 'نمونه شرکای محصول/Agent', value: 'CrowdStrike، Cursor، Harvey، Legora، Lovable، Snowflake' },
+    { label: 'نمونه شرکای مشاوره', value: 'Accenture، Boston Consulting Group، Deloitte' },
+    { label: 'فناوری زیربنایی توسعه', value: 'Model Context Protocol (MCP) و Agent Skills' },
+  ]}
+/>
+
+## سه نوع محتوای متفاوت در یک مارکت‌پلیس
+
+<ComparisonTable
+  caption="سه دسته اصلی Claude Marketplace و نحوه ورود به هرکدام"
+  headers={['دسته', 'مثال', 'نحوه ورود برای عرضه‌کننده']}
+  rows={[
+    ['Plugin و Connector', 'اتصال Claude به Notion، Google Drive، Salesforce', 'ساخت با MCP یا Agent Skills + ثبت در فرایند مستندشده عرضه'],
+    ['محصول/Agent شریک', 'ابزارهای کدنویسی یا امنیتی مبتنی بر Claude از Cursor، CrowdStrike', 'درخواست برای فهرست‌شدن در مارکت‌پلیس'],
+    ['پیمانکار/مشاور استقرار', 'کمک به استقرار سازمانی Claude (Accenture، Deloitte)', 'پیوستن به Claude Partner Network'],
+  ]}
+  highlightCol={0}
+/>
+
+<ProcessSteps
+  title="نحوه استفاده شرکت‌ها از مارکت‌پلیس"
+  steps={[
+    { title: 'افزودن Plugin/Connector', body: 'تیم‌ها Pluginها را برای گسترش نحوه استفاده همکاران خود از Claude فعال می‌کنند.' },
+    { title: 'خرید محصول/Agent شریک', body: 'شرکت‌ها می‌توانند با بخشی از هزینه تعهدشده خود به Anthropic، محصولات و Agentهای شریک را بخرند.' },
+    { title: 'استفاده از شبکه مشاوران', body: 'برای استقرار سازمانی گسترده، شرکت‌ها می‌توانند از پیمانکاران شبکه Claude Partner Network کمک بگیرند.' },
+  ]}
+/>
+
+<Callout type="fact" title="آنچه رسماً مشخص شده">
+  صفحه رسمی Anthropic می‌گوید «هرکسی می‌تواند منتشر کند» و مسیر عرضه برای
+  Connectorها و Pluginها از طریق MCP و Agent Skills است. اما صفحه رسمی،
+  ساختار قیمت‌گذاری مستقل مارکت‌پلیس یا کارمزد انتشار را مشخص نکرده؛ تنها
+  مکانیزم پرداخت ذکرشده، استفاده از بخشی از هزینه تعهدشده مشتری به Anthropic
+  برای خرید محصولات/Agentهای شریک است.
+</Callout>
+
+## چرا به‌عنوان محتوای «مرجع» (نه خبر تازه) ثبت شده؟
+
+این مطلب نزدیک به یک ماه پس از تاریخ انتشار اصلی (۲۳ سپتامبر ۲۰۲۶) نوشته
+می‌شود، چون تا امروز در آرشیو این مجموعه پوشش داده نشده بود. با این حال،
+چون این یک زیرساخت پایدار و درحال‌رشد اکوسیستم است — نه یک خبر گذرا — همچنان
+برای توسعه‌دهندگانی که می‌خواهند Plugin یا Connector بسازند، یا تیم‌هایی که
+دنبال ابزار آماده برای Claude هستند، ارزش مرجع دارد.
+
+## چه زمانی باید سراغ آن بروید؟
+
+اگر در حال ساخت یک Connector یا Plugin با MCP یا Agent Skills هستید و
+می‌خواهید آن را به کاربران فعلی Claude معرفی کنید، Claude Marketplace مسیر
+رسمی توزیع است. اگر به‌عنوان یک تیم مهندسی دنبال ابزار آماده (نه ساخت از
+صفر) برای یک وظیفه خاص هستید — مثل ادغام با Salesforce یا یک Agent امنیتی
+آماده — این مارکت‌پلیس نقطه شروع منطقی برای جست‌وجو است، پیش از آنکه یک راه‌حل
+داخلی از صفر بسازید.
