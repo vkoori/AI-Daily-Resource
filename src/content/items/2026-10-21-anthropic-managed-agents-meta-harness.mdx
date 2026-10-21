@@ -1,0 +1,148 @@
+---
+title: "Managed Agents در Anthropic: چرا باید Harness را مثل یک سیستم‌عامل طراحی کرد؟"
+date: 2026-10-21
+originalDate: 2026-04-08
+source: "Anthropic"
+url: "https://www.anthropic.com/engineering/managed-agents"
+category: "ai-engineering"
+kind: "reference"
+verified: true
+tags: ["anthropic", "managed-agents", "harness-engineering", "mcp", "context-engineering", "sandbox"]
+summary: >
+  Anthropic در وبلاگ مهندسی خود معماری Managed Agents را تشریح کرده: یک
+  سرویس میزبانی‌شده روی Claude Platform برای اجرای Agentهای طولانی‌مدت، که
+  Session (لاگ رویدادها)، Harness (حلقه فراخوانی مدل) و Sandbox (محیط اجرا)
+  را از هم جدا می‌کند تا هیچ‌کدام وابسته به فرضیات موقت درباره توانایی مدل
+  نباشد. این یک محتوای فنی پایه‌ای (منتشرشده اردیبهشت ۱۴۰۵/آوریل ۲۰۲۶) است،
+  نه خبر تازه، اما برای هر تیمی که Harness Agent خودش را می‌سازد همچنان
+  بسیار کاربردی است: کاهش ۶۰٪ (p50) و بیش از ۹۰٪ (p95) تأخیر اولین توکن با
+  Provisioning تنبل، و یک الگوی مجزاسازی Credential که از افشای آن در برابر
+  Prompt Injection جلوگیری می‌کند.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import Callout from '../../components/content/Callout.astro';
+import StatBars from '../../components/content/StatBars.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+
+## این موضوع چیست و چرا الان مهم است؟
+
+وقتی یک تیم مهندسی برای Agentِ خودش یک **Harness** می‌نویسد — یعنی حلقه‌ای
+که مدل را فرا می‌خواند، خروجی‌اش را می‌خواند، Tool Call‌ها را اجرا می‌کند و
+نتیجه را دوباره به مدل می‌دهد — معمولاً فرضیات زیادی درباره «مدل امروز» در
+همان کد Hardcode می‌شود: چه زمانی Context باید Compact شود، مدل چه کارهایی
+را نمی‌تواند انجام دهد، Session باید کجا ذخیره شود. مشکل این است که این
+فرضیات با هر نسخه جدید مدل منسوخ می‌شوند. Anthropic در این مطلب مهندسی
+مثالی می‌زند: یک مکانیزم Reset کردن Context که برای Claude Sonnet 4.5 لازم
+بود، با آمدن Claude Opus 4.5 دیگر غیرضروری شد — اما اگر آن منطق در Harness
+قفل شده باشد، کسی باید دستی برود و آن را حذف کند.
+
+راه‌حلی که Anthropic برای **Managed Agents** (سرویس میزبانی Agentهای
+طولانی‌مدت روی Claude Platform) طراحی کرده، شبیه طراحی یک سیستم‌عامل است:
+به‌جای یک «Harness قطعی»، چند **رابط پایدار (Stable Interface)** تعریف شده
+که قرار است از عمر هر Harند خاص (even نسخه‌های فعلی خود Anthropic) بیشتر
+دوام بیاورند. نویسنده‌های مطلب این رویکرد را «Meta-Harness» می‌نامند.
+
+<KeyFacts
+  facts={[
+    { label: 'منتشرکننده', value: 'Anthropic (وبلاگ مهندسی)' },
+    { label: 'تاریخ انتشار اصلی', value: '۸ آوریل ۲۰۲۶' },
+    { label: 'نوع محتوا', value: 'مرجع/معماری مهندسی (نه خبر تازه)' },
+    { label: 'سه جزء اصلی', value: 'Session (لاگ)، Harness (حلقه)، Sandbox (اجرا)' },
+    { label: 'کاهش تأخیر اولین توکن', value: '~۶۰٪ در p50، بیش از ۹۰٪ در p95 (گزارش داخلی Anthropic)' },
+    { label: 'مستندات تکمیلی', value: 'platform.claude.com/docs/en/managed-agents/overview' },
+  ]}
+/>
+
+## چه مشکلی را حل می‌کند؟
+
+سه مشکل مشخص در طراحی‌های قبلی Agentهای طولانی‌مدت وجود داشت که این مطلب
+به آن‌ها اشاره می‌کند:
+
+<ProcessSteps
+  title="سه مشکل طراحی‌های قدیمی Agent، طبق گزارش Anthropic"
+  steps={[
+    {
+      title: 'فرضیات Harness کهنه می‌شوند',
+      body: 'منطقی که برای محدودیت‌های یک نسخه مدل نوشته شده (مثل Reset اجباری Context)، با ارتقای مدل بلااستفاده یا حتی مخرب می‌شود؛ چون هیچ‌کس سیستماتیک آن را بازبینی نمی‌کند.',
+    },
+    {
+      title: 'جفت‌شدگی در یک Container',
+      body: 'وقتی Session، Harness و Sandbox همه در یک Container اجرا می‌شوند: از‌کار‌افتادن Container یعنی از دست رفتن کل Session، دیباگ یک Session گیرکرده سخت می‌شود، و مشتری‌هایی که به شبکه VPC خودشان نیاز دارند باید کل Harness را خودشان اجرا کنند.',
+    },
+    {
+      title: 'ریسک امنیتی Credential',
+      body: 'وقتی Credentialها (مثل Token‌های Git یا کلیدهای MCP) در همان Container ای قرار دارند که کد تولیدشده توسط مدل اجرا می‌شود، یک حمله Prompt Injection می‌تواند مستقیماً آن Credentialها را افشا کند.',
+    },
+  ]}
+/>
+
+## چگونه کار می‌کند؟
+
+راه‌حل Anthropic، مجزاسازی هر سه جزء پشت رابط‌های ساده و پایدار است:
+
+<ComparisonTable
+  caption="سه جزء معماری Managed Agents و نقش هرکدام"
+  headers={['جزء', 'نقش', 'رابط کلیدی']}
+  rows={[
+    ['Session', 'لاگ Append-Only از همه رویدادها؛ مستقل از عمر یک Harness خاص', 'wake، getSession، emitEvent، getEvents'],
+    ['Harness', 'حلقه‌ای که Claude را فرا می‌خواند و Tool Callها را مسیریابی می‌کند', '(قابل تعویض؛ می‌تواند Claude Code یا Harness اختصاصی باشد)'],
+    ['Sandbox', 'محیط اجرای کد و فایل؛ یک Container یک‌بارمصرف و قابل Provisioning بر اساس تقاضا', 'execute(name, input) → string'],
+  ]}
+/>
+
+نکته‌های کلیدی در این معماری:
+
+- **بازیابی پس از خرابی:** چون لاگ Session خارج از Harness نگهداری می‌شود،
+  اگر یک Harness از کار بیفتد، یک Harness تازه می‌تواند همان لاگ را بخواند
+  و دقیقاً از همان‌جا ادامه دهد — بدون از دست رفتن تاریخچه.
+- **مجزاسازی Credential:** توکن‌های Git فقط در زمان راه‌اندازی اولیه
+  Sandbox استفاده می‌شوند تا Remote را وصل کنند؛ خودِ Agent هرگز آن‌ها را
+  نمی‌بیند. فراخوانی‌های MCP هم از یک Proxy عبور می‌کنند که Credential را از
+  یک Vault می‌گیرد — یعنی حتی Harness هم مستقیماً Credential را نمی‌بیند.
+- **Context به‌عنوان یک Store، نه یک رشته یک‌طرفه:** به‌جای Compact کردن
+  غیرقابل‌برگشت تاریخچه، Harness می‌تواند برش‌های موضعی از لاگ Session را با
+  `getEvents()` بخواند و قبل از رساندن به پنجره Context مدل، آن‌ها را
+  تبدیل/فیلتر کند.
+- **Provisioning تنبل:** Containerها فقط وقتی یک Session واقعاً به آن‌ها
+  نیاز دارد ساخته می‌شوند، یعنی فراخوانی مدل می‌تواند پیش از آماده شدن
+  Sandbox شروع شود.
+
+<StatBars
+  metric="کاهش تأخیر اولین توکن (TTFT) پس از اعمال Provisioning تنبل"
+  unit="٪"
+  series={[
+    { label: 'کاهش در p50 (میانه)', value: 60, highlight: true },
+    { label: 'کاهش در p95 (دم توزیع)', value: 90 },
+  ]}
+  note="اعداد گزارش‌شده توسط خودِ Anthropic هستند؛ شرایط دقیق تست (نوع بار کاری، سخت‌افزار) در مطلب اصلی ذکر نشده است."
+/>
+
+<Callout type="analysis" title="چه بخشی نظر/چارچوب‌دهی Anthropic است؟">
+  اینکه «Harness باید مثل سیستم‌عامل Virtualize شود» یک انتخاب طراحی و
+  استدلال Anthropic است، نه یک حقیقت فنی اثبات‌شده. به همین ترتیب، ادعای
+  اینکه این معماری با هوشمندی رو‌به‌رشد Claude «هم‌گام» خواهد ماند، یا اینکه
+  مجزاسازی ساختاری Credential از محدودسازی دامنه Token (Scoping) بهتر است،
+  همگی تحلیل و باور مهندسان Anthropic است. این‌ها منطقی و قابل‌دفاع‌اند، اما
+  جایگزینی برای تست در سناریوی خودِ شما نیستند.
+</Callout>
+
+## چه زمانی و برای چه کسی کاربرد دارد؟
+
+این مطلب برای هر تیمی که یک Harness سفارشی برای Agent خودش می‌سازد —
+به‌خصوص برای وظایف طولانی‌مدت مثل Refactor کردن یک مخزن بزرگ، Workflowهای
+چندمرحله‌ای DevOps، یا Agentهایی که باید به VPC یا ابزارهای داخلی شرکت وصل
+شوند — ارزش مطالعه دارد، حتی اگر از خودِ سرویس Managed Agents استفاده
+نکنید. سه اصل قابل‌انتقال به هر معماری Agent عبارت‌اند از: جدا نگه‌داشتن لاگ
+وضعیت از منطق اجرا (برای Debug‌پذیری و بازیابی)، هرگز قرار ندادن Credential
+در همان محیطی که کد تولیدشده توسط مدل اجرا می‌شود، و رفتار با Container‌ها
+به‌عنوان منابع یک‌بارمصرف و قابل Provisioning بر اساس تقاضا به‌جای
+زیرساخت ثابت.
+
+<Callout type="caution" title="محدودیت این مطلب">
+  این مطلب یک توضیح معماری عمومی است و جزئیات قیمت‌گذاری یا فهرست دقیق
+  مشتریان هدف Managed Agents را ارائه نمی‌دهد؛ برای شروع عملی باید به
+  مستندات Claude Platform مراجعه کرد. همچنین چون این محتوا از آوریل ۲۰۲۶
+  است، برخی جزئیات پیاده‌سازی ممکن است در نسخه فعلی سرویس تغییر کرده باشد.
+</Callout>
