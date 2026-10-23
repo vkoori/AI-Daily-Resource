@@ -1,0 +1,113 @@
+---
+title: "چند تغییر کوچک اما مهم Context Engineering در Claude Code: Compaction خودکار، Tool Search پیش‌فرض و Cache ارزان‌تر"
+date: 2026-10-23
+source: "Claude Code Changelog"
+url: "https://code.claude.com/docs/en/changelog"
+category: "ai-engineering"
+kind: "technique"
+verified: true
+tags: ["claude-code", "context-engineering", "compaction", "tool-search", "prompt-caching", "mcp"]
+summary: >
+  در فاصلهٔ ۹ تا ۲۲ اکتبر ۲۰۲۶، چند نسخهٔ پیاپی Claude Code (از ۲.۱.۲۹۶ تا
+  ۲.۱.۳۰۹) مجموعه‌ای از تغییرات کوچک اما به‌هم‌مرتبط در حوزهٔ مدیریت Context
+  منتشر کرده‌اند: Compaction خودکار هنگام بی‌کاری برای مکالمه‌های بالای
+  ۲۰۰ هزار توکن، پنجرهٔ Compaction جداگانه برای Subagentها، فعال‌شدن
+  پیش‌فرض Tool Search پشت Gatewayهای سفارشی، فشرده‌سازی Gzip پیش‌فرض برای
+  درخواست‌های بزرگ API، و کاهش قیمت Cache-Read مدل Sonnet 5.5 به ۰.۱۰ دلار
+  به ازای هر میلیون توکن. هیچ‌کدام به‌تنهایی خبر بزرگی نیست، اما همگی یک
+  الگوی مشترک را نشان می‌دهند: مدیریت خودکارتر و ارزان‌تر Context در
+  مکالمه‌های Agentic طولانی.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چرا الان مهم است؟
+
+وقتی یک Agent کدنویسی مثل Claude Code ساعت‌ها روی یک کار کار می‌کند،
+Context آن (تاریخچهٔ مکالمه، خروجی ابزارها، فایل‌های خوانده‌شده) به‌سرعت
+رشد می‌کند. مدیریت این Context — چه زمانی خلاصه‌اش کنیم، چه چیزی را
+Cache کنیم، چطور فهرست بزرگ ابزارها را بدون اشغال کل پنجره در اختیار مدل
+بگذاریم — دقیقاً همان چیزی است که این روزها «Context Engineering» نامیده
+می‌شود. Changelog رسمی Claude Code در بازهٔ ۹ تا ۲۲ اکتبر ۲۰۲۶ (نسخه‌های
+۲.۱.۲۹۶ تا ۲.۱.۳۰۹) چند قطعه از این پازل را به‌روزرسانی کرده است.
+
+<KeyFacts
+  facts={[
+    { label: 'بازهٔ نسخه‌ها', value: 'v2.1.296 (۹ اکتبر) تا v2.1.309 (۲۲ اکتبر ۲۰۲۶)' },
+    { label: 'منبع', value: 'Claude Code Changelog رسمی (code.claude.com)' },
+    { label: 'حوزهٔ اصلی تغییرات', value: 'Context Compaction، Tool Search، Prompt Caching، امنیت Workspace' },
+    { label: 'آستانهٔ Idle Compaction', value: 'مکالمه‌های بالای ۲۰۰ هزار توکن' },
+    { label: 'قیمت جدید Cache-Read', value: '۰.۱۰ دلار به ازای هر میلیون توکن برای Sonnet 5.5' },
+  ]}
+/>
+
+## چه مشکلی را حل می‌کند؟
+
+<ProcessSteps
+  title="پنج تغییر و مشکلی که هرکدام هدف گرفته‌اند"
+  steps={[
+    {
+      title: 'Compaction خودکار هنگام بی‌کاری (نسخهٔ ۲.۱.۲۹۹، ۱۴ اکتبر)',
+      body: 'مکالمه‌هایی که از ۲۰۰ هزار توکن عبور می‌کنند، معمولاً باید دستی Compact شوند وگرنه کند و پرهزینه می‌شوند. این نسخه Compaction را در زمان بی‌کاری (Idle) و بدون دخالت کاربر انجام می‌دهد.',
+    },
+    {
+      title: 'پنجرهٔ Compaction جدا برای Subagentها (نسخهٔ ۲.۱.۲۹۶، ۹ اکتبر)',
+      body: 'افزودن autoCompactWindow مخصوص Subagentها به این معناست که یک Subagent فرعی می‌تواند زودتر یا دیرتر از Agent اصلی Compact شود — چون الگوی مصرف Context آن معمولاً متفاوت است.',
+    },
+    {
+      title: 'Tool Search پیش‌فرض پشت Gatewayهای سفارشی (نسخهٔ ۲.۱.۳۰۴، ۱۹ اکتبر)',
+      body: 'وقتی تعداد ابزارهای متصل (مثلاً از طریق MCP) زیاد است، فهرست کامل آن‌ها جا زیادی از Context می‌گیرد. Tool Search به‌جای بارگذاری همهٔ Schemaها، فقط ابزار مرتبط را در لحظه پیدا می‌کند؛ این نسخه آن را حتی پشت ANTHROPIC_BASE_URL سفارشی هم پیش‌فرض کرده.',
+    },
+    {
+      title: 'فشرده‌سازی Gzip پیش‌فرض (نسخهٔ ۲.۱.۳۰۰، ۱۴ اکتبر)',
+      body: 'درخواست‌های بزرگ به API اکنون به‌صورت پیش‌فرض Gzip می‌شوند — کاهش حجم انتقال داده، به‌خصوص برای Promptهای طولانی یا Contextهای سنگین.',
+    },
+    {
+      title: 'الزام Workspace Trust برای claude ultrareview (نسخهٔ ۲.۱.۳۰۹، ۲۲ اکتبر)',
+      body: 'یک تغییر امنیتی مرتبط: اجرای حالت ultrareview اکنون نیاز به تأیید اعتماد به Workspace دارد، تا بازبینی عمیق کد به‌طور ناخواسته روی یک پوشهٔ نامعتبر اجرا نشود.',
+    },
+  ]}
+/>
+
+<ComparisonTable
+  caption="خلاصهٔ تغییرات مرتبط با Context در این بازه"
+  headers={['نسخه', 'تاریخ', 'تغییر', 'دسته']}
+  rows={[
+    ['v2.1.296', '۹ اکتبر', 'autoCompactWindow برای Subagentها + کاهش قیمت Cache-Read Sonnet 5.5 به ۰.۱۰$/M', 'Compaction / Caching'],
+    ['v2.1.299', '۱۴ اکتبر', 'Idle Compaction خودکار برای مکالمه‌های بالای ۲۰۰K توکن', 'Compaction'],
+    ['v2.1.300', '۱۴ اکتبر', 'فشرده‌سازی Gzip پیش‌فرض برای درخواست‌های بزرگ API', 'شبکه/هزینه'],
+    ['v2.1.304', '۱۹ اکتبر', 'Tool Search پیش‌فرض حتی پشت Gateway سفارشی', 'Tool Calling'],
+    ['v2.1.309', '۲۲ اکتبر', 'الزام Workspace Trust برای claude ultrareview', 'امنیت'],
+  ]}
+/>
+
+## چه زمانی/برای چه کسی کاربرد دارد؟
+
+این تغییرات بیشتر برای کسانی اهمیت دارند که Claude Code را در جریان‌های
+کاری طولانی یا Agentic استفاده می‌کنند: مکالمه‌های چندساعته، Subagentهای
+موازی، یا اتصال به دهِ‌ها ابزار از طریق MCP. اگر معمولاً مکالمه‌های کوتاه
+دارید، این تغییرات تأثیر قابل‌لمسی روی تجربهٔ روزمره‌تان نمی‌گذارند؛ اما
+برای تیمی که Pipeline یا Harness خودش را روی Claude Code می‌سازد، نکات
+عملی مهمی دارند — مثلاً دیگر لازم نیست Compaction را دستی و زمان‌بندی‌شده
+صدا بزنید، و اگر از یک Gateway سفارشی (ANTHROPIC_BASE_URL) استفاده
+می‌کنید، از این پس Tool Search را به‌صورت پیش‌فرض و بدون تنظیم اضافه
+دریافت می‌کنید.
+
+<Callout type="fact" title="واقعیت تأییدشده">
+  تمام این موارد مستقیماً از Changelog رسمی و نسخه‌بندی‌شدهٔ Claude Code
+  (code.claude.com/docs/en/changelog) نقل شده‌اند، نه از تحلیل یا گزارش
+  شخص ثالث؛ شماره نسخه و تاریخ هرکدام در همان صفحه قابل بررسی و پیگیری
+  است.
+</Callout>
+
+<Callout type="tip" title="نکتهٔ کاربردی">
+  اگر Pipeline شما به Compaction دستی یا زمان‌بندی‌شده برای مکالمه‌های
+  طولانی وابسته بود، با فعال‌شدن Idle Compaction خودکار بررسی کنید که آن
+  منطق دستی تکراری یا حتی در تناقض با رفتار پیش‌فرض جدید نشود. همچنین اگر
+  از Gateway سفارشی استفاده می‌کنید، فعال‌شدن پیش‌فرض Tool Search یعنی
+  رفتار فراخوانی ابزار ممکن است نسبت به قبل کمی تغییر کند؛ ارزش دارد پس از
+  ارتقا یک بار جریان کاری خودتان را تست کنید.
+</Callout>
