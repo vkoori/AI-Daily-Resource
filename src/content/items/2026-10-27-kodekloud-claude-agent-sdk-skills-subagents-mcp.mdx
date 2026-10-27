@@ -1,0 +1,117 @@
+---
+title: "Skill، Subagent و MCP در Claude Agent SDK: نقشهٔ راه عملی KodeKloud برای ساخت عامل‌های زیرساختی"
+date: 2026-10-27
+source: "KodeKloud"
+url: "https://kodekloud.com/courses/learn-by-doing-building-ai-agents-with-claude-agent-sdk"
+category: "ai-engineering"
+kind: "technique"
+verified: true
+tags: ["claude-agent-sdk", "skills", "subagents", "mcp", "agentic-infrastructure", "kodekloud", "terraform"]
+summary: >
+  دوره‌ای عملی از KodeKloud («Learn by Doing: Building AI Agents with
+  Claude Agent SDK»، به تدریس Sai Krishna Yerramsetty) سه لایهٔ اصلی
+  ساخت عامل با Claude Agent SDK را روی وظایف واقعی AWS/Terraform تمرین
+  می‌دهد: حلقهٔ Think-Action-Observe-Decide با ابزارهای پایه، Skillهای
+  فایل‌محور در قالب `SKILL.md`، و Subagentهای تخصصی با اصل کمترین
+  دسترسی. این دوره یک منبع آموزشی غیررسمی و تجاری است (شامل گواهی و
+  Cloud Lab پولی)، نه یک مستند رسمی Anthropic؛ نام این سه لایه و تمایز
+  بین آن‌ها اما دقیقاً با مستندات رسمی Claude Agent SDK هم‌خوان است.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چرا الان مهم است؟
+
+بسیاری از تیم‌هایی که برای اولین‌بار با Claude Agent SDK (کیت رسمی
+Python از Anthropic برای ساخت عامل‌هایی که استدلال می‌کنند، از ابزار
+استفاده می‌کنند و وظیفه را خودکار می‌کنند) کار می‌کنند، مرز بین سه
+مفهوم Tool، Skill و Subagent را گم می‌کنند. دورهٔ «Learn by Doing:
+Building AI Agents with Claude Agent SDK» از KodeKloud، به تدریس Sai
+Krishna Yerramsetty (معمار اصلی پلتفرم در KodeKloud)، این سه مفهوم را
+نه با توضیح انتزاعی، بلکه با Labهای واقعی روی AWS و Terraform —
+نوشتن/اصلاح Template، رفع‌اشکال زیرساخت شکسته، و فراهم‌کردن VPC —
+تمرین می‌دهد.
+
+<KeyFacts
+  facts={[
+    { label: 'منبع', value: 'KodeKloud — دوره «Learn by Doing: Building AI Agents with Claude Agent SDK»' },
+    { label: 'مدرس', value: 'Sai Krishna Yerramsetty، Principal Platform Architect در KodeKloud' },
+    { label: 'ساختار', value: 'شش ماژول، همراه با Cloud Lab و گواهی پایان دوره' },
+    { label: 'حوزهٔ عملی تمرین‌ها', value: 'AWS، Terraform و CloudFormation' },
+    { label: 'سه مفهوم کلیدی آموزش‌داده‌شده', value: 'ابزارهای پایه (Glob، Read، Grep، Edit، Bash)، Skill (فایل‌محور)، Subagent (با دسترسی محدود)' },
+    { label: 'ماهیت منبع', value: 'آموزشی و تجاری (غیررسمی)، نه مستند رسمی Anthropic' },
+  ]}
+/>
+
+## چگونه کار می‌کند؟
+
+<ProcessSteps
+  title="مسیر دوره: از یک عامل ساده تا هماهنگی چند Subagent"
+  steps={[
+    {
+      title: 'پایه: حلقهٔ Think-Action-Observe-Decide',
+      body: 'شروع با پیکربندی ClaudeAgentOptions (مدل، ابزارها، حالت مجوز)، اجرای اولین Query و خوانش پاسخ از AssistantMessage، و استفاده از ابزار Bash برای کار با AWS CLI.',
+    },
+    {
+      title: 'ابزارهای درونی: کشف و اصلاح فایل',
+      body: 'استفاده از ابزارهای کشف (Glob، Read، Grep) و اصلاح (Edit، MultiEdit، Write) برای کار با Templateهای Terraform، ازجمله رفع‌اشکال زیرساختی که از قبل خراب است.',
+    },
+    {
+      title: 'مکالمهٔ چندنوبتی با ClaudeSDKClient',
+      body: 'نگه‌داشتن Context بین چند تبادل با یک نمونهٔ دائمی از Client، به همراه حالت‌های مجوز برای اصلاح امن فایل‌ها و Provisioning زیرساخت.',
+    },
+    {
+      title: 'Skillهای فایل‌محور',
+      body: 'نوشتن Skill در قالب YAML Frontmatter داخل فایل‌های SKILL.md، ذخیره‌شده در مسیر .claude/skills/، و ترکیب چند Skill برای گردش‌کارهای پیچیده‌تر — مثلاً یک Lab برای ساخت Skill مدیریت EC2.',
+    },
+    {
+      title: 'Subagentهای تخصصی با کمترین دسترسی',
+      body: 'تعریف Subagent با AgentDefinition، واگذاری خودکار وظیفه بر اساس توضیح هر Subagent، و محدودکردن ابزار هر Subagent به حداقل لازم؛ Labها Subagentهای شبکه و امنیت برای Provisioning یک VPC می‌سازند.',
+    },
+    {
+      title: 'هماهنگی چند سرور MCP',
+      body: 'اتصال به سرورهای MCP از طریق Transport از نوع stdio، کشف ابزارها با نام‌های فضانام‌دار (Namespaced)، و هماهنگ‌کردن چند سرور MCP برای کار فایل‌سیستم و CloudFormation هم‌زمان.',
+    },
+  ]}
+/>
+
+<ComparisonTable
+  caption="سه لایهٔ Claude Agent SDK که دوره روی آن‌ها تمرین می‌دهد"
+  headers={['لایه', 'نقش اصلی', 'مثال در دوره']}
+  rows={[
+    ['ابزار (Tool)', 'اقدام درون‌ساختی روی فایل یا Shell', 'Glob/Read/Grep برای کشف، Edit/Write برای اصلاح Template'],
+    ['Skill', 'دستورالعمل نهادی فایل‌محور که به Context عامل اضافه می‌شود', 'SKILL.md برای مدیریت EC2 در .claude/skills/'],
+    ['Subagent', 'Worker مستقل با Context و مجوز محدود خودش', 'Subagent شبکه و Subagent امنیت برای Provisioning یک VPC'],
+  ]}
+  highlightCol={1}
+/>
+
+<Callout type="fact" title="واقعیت تأییدشده">
+  ساختار شش‌ماژولی، نام مدرس، و توصیف فنی هر لایه (Tool، Skill با
+  Frontmatter در SKILL.md، Subagent با AgentDefinition و MCP با
+  Transport از نوع stdio) مستقیماً از صفحهٔ رسمی دوره در kodekloud.com
+  گرفته شده‌اند.
+</Callout>
+
+<Callout type="caution" title="نکته احتیاط">
+  صفحهٔ این دوره یک خطای کپی دارد: متادیتای توضیح و تگ‌های اجتماعی آن
+  به‌اشتباه دورهٔ دیگری دربارهٔ مدیریت Kubernetes با Rancher را توصیف
+  می‌کنند، درحالی‌که محتوای قابل‌مشاهدهٔ صفحه با عنوان Claude Agent SDK
+  مطابقت دارد. همچنین تاریخ انتشار یا آخرین به‌روزرسانی دوره مشخص نشده
+  (فقط ©۲۰۲۶ در پابرگ) و این دوره رایگان نیست — بخشی از پیشنهاد تجاری
+  KodeKloud با گواهی و Lab ابری است.
+</Callout>
+
+## چه زمانی و برای چه کسی کاربرد دارد؟
+
+این دوره برای توسعه‌دهندگان Python‌ای که می‌خواهند از صفر با Claude
+Agent SDK عامل بسازند و به‌طور خاص روی زیرساخت ابری (AWS/Terraform)
+کار می‌کنند، مناسب‌ترین است. اما ارزش اصلی آن برای هر مهندسی که با
+Claude Code یا SDKهای مشابه کار می‌کند، فراتر از محتوای AWS است:
+تمایز عملیِ Tool در برابر Skill در برابر Subagent — که همان سؤال رایج
+«این را Skill بسازم یا Subagent؟» را پاسخ می‌دهد — و الگوی اصل کمترین
+دسترسی برای هر Subagent، نکته‌ای است که در هر پروژهٔ Agentic، نه فقط
+زیرساخت ابری، کاربرد دارد.
