@@ -1,0 +1,119 @@
+---
+title: "NVIDIA Nemotron 3.5 Embed، Rerank و Parse: سه مدل باز برای بازیابی اطلاعات در RAG و ایجنت‌های سندمحور"
+date: 2026-10-31
+originalDate: 2026-10-21
+source: "NVIDIA (از طریق Hugging Face)"
+url: "https://huggingface.co/blog/nvidia/nemotron-retriever-world-class-agentic-retrieval"
+category: "rag-knowledge-systems"
+kind: "tool"
+verified: true
+tags: ["nvidia", "nemotron", "rag", "embedding", "reranking", "document-parsing", "open-weights"]
+summary: >
+  NVIDIA در ۲۱ اکتبر ۲۰۲۶ سه مدل باز جدید برای بازیابی اطلاعات منتشر
+  کرد: Nemotron-3.5-Embed (در دو اندازهٔ ۸ میلیارد و ۱ میلیارد پارامتر)،
+  Nemotron-3.5-Rerank-8B، و Nemotron-3.5-Parse (حدود ۶۰۰ میلیون پارامتر)
+  برای تبدیل تصویر سند به متن ساختاریافته. طبق اعداد خودِ NVIDIA، مدل
+  Embed-8B روی بنچمارک ViDoRe v3.1 در میان مدل‌های Dense رتبهٔ اول را
+  دارد و نسخهٔ سبک NVFP4 آن تا ۲۷٪ توان عملیاتی بیشتر با افت دقت کمتر
+  از نیم درصد می‌دهد؛ این مدل‌ها مخصوصاً برای بازیابی در اسناد
+  تصویری/پیچیده (جدول، نمودار، فرم) طراحی شده‌اند.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import StatBars from '../../components/content/StatBars.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چرا الان مطرح شده؟
+
+در اکثر سیستم‌های RAG، سه مرحله جدا از هم و اغلب با مدل‌های جدا انجام
+می‌شود: استخراج متن از سند (OCR/Parsing)، تبدیل متن به بردار برای
+جست‌وجو (Embedding)، و مرتب‌سازی دقیق‌تر نتایج بازیابی‌شده (Reranking).
+وقتی سند فقط متن ساده نباشد — مثل یک صورت‌حساب با جدول، یک نمودار در
+گزارش مالی، یا یک فرم اسکن‌شده — این خط‌لوله به‌سادگی می‌شکند، چون
+Embeddingهای متنیِ معمولی ساختار بصری را از دست می‌دهند. NVIDIA با سهٔ
+مدل Nemotron 3.5 Embed، Rerank و Parse (منتشرشده ۲۱ اکتبر ۲۰۲۶) هر سه
+مرحله را برای اسناد «بصری/پیچیده» (Visually Rich) به‌طور اختصاصی
+بازطراحی کرده است.
+
+<KeyFacts
+  facts={[
+    { label: 'ناشر و تاریخ', value: 'NVIDIA — ۲۱ اکتبر ۲۰۲۶ (از طریق وبلاگ Hugging Face)' },
+    { label: 'مدل‌های منتشرشده', value: 'Embed-8B، Embed-1B (BF16 و NVFP4)، Rerank-8B، Parse (~۶۰۰ میلیون پارامتر)' },
+    { label: 'معماری پایه', value: 'Embed روی Ministral-3-8B-Instruct با یادگیری تقابلی (Contrastive)؛ Rerank یک Cross-Encoder با همان بک‌بون؛ Parse با پیش‌بینی چندنشانه‌ای و Decoding گمانه‌زنی‌شده' },
+    { label: 'زبان‌های آزموده‌شده', value: 'بازیابی متنی: ۳۴ زبان؛ بازیابی بصری: ۱۸ زبان (MIRACL Vision) + KoViDoRe' },
+    { label: 'کاربران اولیهٔ اعلام‌شده', value: 'Elasticsearch، Hindsight (حافظهٔ ایجنت)، Perplexity، Turbopuffer' },
+  ]}
+/>
+
+## چگونه کار می‌کند؟
+
+<StatBars
+  metric="امتیاز nDCG@10 روی بنچمارک ViDoRe v3.1 (بازیابی در اسناد بصری/پیچیده)"
+  series={[
+    { label: 'Nemotron-3.5-Embed-8B', value: 61.17, highlight: true },
+    { label: 'Nemotron-3.5-Embed-1B', value: 58.38 },
+    { label: 'Llama Nemotron Embed VL 1B (نسل قبل)', value: 52.23 },
+  ]}
+  note="روی NVFP4 (سخت‌افزار GB200)، توان عملیاتی ۱۲۸.۸ سند/ثانیه در برابر ۱۰۱.۳ برای BF16 (۲۷.۱٪ بیشتر) با حفظ ۹۹.۸۵٪ از دقت بازیابی BF16."
+/>
+
+مدل Embed-8B از زبانهٔ مدل Ministral-3-8B-Instruct ساخته شده و با
+یادگیری تقابلی (Contrastive Learning) برای بازیابی چندوجهی (متن + تصویر
+سند) آموزش دیده؛ نسخهٔ ۱ میلیاردی آن با Distillation از همین مدل ۸
+میلیاردی (با ترکیب Loss کسینوسی و MSE) ساخته شده و چون بخش زبانی‌اش در
+آموزش Embedding یخ‌زده نگه داشته شده، Embeddingهای متن‌تنها آن با نسل
+قبلی Nemotron 3 Embed هم‌خوان مانده است. مدل Rerank-8B از همان بک‌بون در
+قالب یک Cross-Encoder با یک سر امتیازدهی MLP استفاده می‌کند. مدل Parse
+هم با پیش‌بینی چندنشانه‌ای (Multi-Token Prediction)، Decoding
+گمانه‌زنی‌شده، و پردازش در رزولوشن اصلی تصویر، سند را به Markdown/جدول
+HTML ساختاریافته تبدیل می‌کند؛ پس از آموزش پایه، با روش GRPO و پاداش‌های
+اختصاصی Fine-tune شده است.
+
+<ComparisonTable
+  caption="مقایسهٔ Nemotron 3.5 Rerank-8B با یک رقیب باز روی ViDoRe v3.1"
+  headers={['مدل', 'nDCG@10 (Reranking)', 'نکته']}
+  rows={[
+    ['Nemotron-3.5-Rerank-8B', '60.49', 'بهبود ~۰.۹ امتیاز نسبت به رقیب در هزینهٔ مشابه'],
+    ['Qwen3-VL-Reranker-8B', '59.17', 'رقیب متن‌باز با اندازهٔ مشابه'],
+  ]}
+  highlightCol={1}
+/>
+
+<Callout type="fact" title="واقعیت تأییدشده">
+  همهٔ اعداد بالا، اندازهٔ پارامترها، مجموعه‌داده‌های بنچمارک (ViDoRe
+  v3.1، MIRACL Vision)، و ادعای کاربران اولیه مستقیماً از پست رسمی
+  NVIDIA روی وبلاگ Hugging Face نقل شده‌اند.
+</Callout>
+
+<Callout type="caution" title="نکته احتیاط">
+  این اعداد عمدتاً از ارزیابی خودِ NVIDIA یا شرکای آن (نه یک آزمایشگاه
+  کاملاً مستقل) گزارش شده‌اند. هم‌چنین دو ناهماهنگی در خودِ منبع دیده
+  می‌شود: صفحه، مدل Parse را «۶۳۱ میلیون پارامتر» می‌نامد در حالی که
+  برچسب آن در Hugging Face «۰.۶B» است؛ و Elastic (یکی از شرکای اعلام‌شده)
+  به‌صراحت گفته پشتیبانی On-Prem از مدل‌های Nemotron هنوز در نقشهٔ راه
+  است، نه یک قابلیت آمادهٔ امروز.
+</Callout>
+
+## چه زمانی و برای چه کسی کاربرد دارد؟
+
+برای تیم‌هایی که یک Pipeline RAG روی اسنادی غیر از متن ساده می‌سازند —
+قراردادها با جدول، گزارش‌های مالی با نمودار، فرم‌های اسکن‌شده، یا
+مستندات فنی با Diagram — این سه مدل یک مسیر یکپارچه از «تصویر سند» تا
+«نتیجهٔ بازیابی رتبه‌بندی‌شده» فراهم می‌کنند، بدون نیاز به ترکیب دستی
+چند مدل مجزا از ارائه‌دهنده‌های مختلف. نسخهٔ سبک ۱ میلیاردی و فرمت
+NVFP4 به‌خصوص برای تیم‌هایی که حجم بالایی از Indexing دارند و به
+توان عملیاتی حساس‌اند (نه فقط دقت) جذاب است؛ Fine-tuning دامنه‌ای هم
+طبق اعداد منتشرشده (مثلاً +۱۸٪ نسبی روی نمودار/اینفوگرافیک) بازده
+محسوسی دارد.
+
+## مقایسه با گزینه‌های مشابه
+
+در برابر مدل‌های Embedding/Reranking متن‌بازِ شناخته‌شده مثل خانوادهٔ
+Qwen3-VL-Embedding/Reranker، برتری ادعاشدهٔ NVIDIA عمدتاً روی اسناد
+بصری/پیچیده (نه متن ساده) و در فرمت‌های سبک‌شده (NVFP4) برای سخت‌افزار
+Blackwell دیده می‌شود — مزیتی که وابسته به سخت‌افزار خاص NVIDIA است و
+شاید روی GPUهای دیگر به همان اندازه ظاهر نشود. هم‌چنین چون مجوز دقیق
+انتشار این مدل‌ها به‌صراحت در پست اعلام نشده (فقط «باز و قابل‌استفادهٔ
+تجاری» ذکر شده)، پیش از استفادهٔ تجاری باید مجوز دقیق هر مدل را از
+صفحهٔ آن در Hugging Face بررسی کرد.
