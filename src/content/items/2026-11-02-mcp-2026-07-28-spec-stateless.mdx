@@ -1,0 +1,104 @@
+---
+title: "مرجع: نسخهٔ ۲۰۲۶-۰۷-۲۸ پروتکل MCP — از یک پروتکل مبتنی بر Session به یک معماری بی‌حالت"
+date: 2026-11-02
+originalDate: 2026-07-28
+source: "Model Context Protocol (Anthropic)"
+url: "https://blog.modelcontextprotocol.io/posts/2026-07-28/"
+category: "ai-engineering"
+kind: "reference"
+verified: true
+tags: ["mcp", "model-context-protocol", "oauth", "agent-architecture", "api-design"]
+summary: >
+  نسخهٔ ۲۸ ژوئیهٔ ۲۰۲۶ از مشخصات Model Context Protocol (MCP)، یک تغییر
+  بنیادی در معماری این پروتکل اعمال کرده: حذف Handshake مبتنی بر Session و
+  هدر Mcp-Session-Id، به‌نفع یک هسته کاملاً بی‌حالت (Stateless) که هر
+  درخواست را می‌تواند مستقل روی هر Instance پردازش کند. این تغییر برای هر
+  تیمی که MCP Server تولیدی پشتِ Load Balancer معمولی اجرا می‌کند، یک
+  مفهوم پایه‌ای و هنوز کم‌شناخته‌شده است — به همین دلیل اینجا به‌عنوان
+  محتوای مرجع آورده شده، نه خبر تازه.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چرا هنوز مهم است؟
+
+Model Context Protocol (MCP) — پروتکل بازی که Anthropic برای اتصال
+مدل‌های زبانی به ابزارها و منابع داده معرفی کرد — در ۲۸ ژوئیهٔ ۲۰۲۶ یک
+نسخهٔ مشخصات تازه منتشر کرد که به‌گفتهٔ خودِ تیم MCP، تغییراتِ آن
+«قابل‌توجه» (Breaking) است. هرچند این بروزرسانی چند ماه پیش منتشر شده، اما
+چون یک تغییر معماریِ بنیادی در نحوهٔ طراحی MCP Serverهای تولیدی است و هر
+تیمی که همین امروز یک Server جدید می‌سازد یا یک Server قدیمی را به مقیاس
+بزرگ‌تر می‌برد با آن روبه‌رو می‌شود، شناختنش همچنان ارزش آموزشی دارد.
+
+<KeyFacts
+  facts={[
+    { label: 'تاریخ انتشار نسخهٔ مشخصات', value: '۲۸ ژوئیهٔ ۲۰۲۶ (پس از ۱۰ هفته Release Candidate)' },
+    { label: 'ناشر', value: 'تیم Model Context Protocol (نگهداری‌شده توسط Anthropic)' },
+    { label: 'بزرگ‌ترین تغییر', value: 'حذف Handshake initialize/initialized و هدر Mcp-Session-Id؛ هسته‌ای کاملاً بی‌حالت' },
+    { label: 'وضعیت SDKها', value: 'TypeScript، Python، Go و C# در زمان انتشار از مشخصات پشتیبانی می‌کنند؛ Rust در حالت Beta' },
+    { label: 'بازهٔ مهلتِ حذف قابلیت‌های قدیمی', value: 'Roots، Sampling، Logging و انتقال HTTP+SSE: حداقل ۱۲ ماه پشتیبانیِ موازی' },
+  ]}
+/>
+
+## چگونه کار می‌کند؟
+
+<ProcessSteps
+  title="مهم‌ترین تغییرات معماری در این نسخه"
+  steps={[
+    { title: 'هستهٔ بی‌حالت (Stateless)', body: 'هر درخواست، نسخهٔ پروتکل، هویت Client و قابلیت‌هایش را خودش در _meta حمل می‌کند؛ فراخوانی اختیاری server/discover برای شناخت زودهنگام قابلیت‌های سرور اضافه شده.' },
+    { title: 'مسیریابی مبتنی بر هدر', body: 'درخواست‌های Streamable HTTP باید هدرهای Mcp-Method و Mcp-Name داشته باشند تا Gateway، Rate Limiter و WAF بدون Parse کردن بدنهٔ JSON بتوانند مسیریابی و اندازه‌گیری کنند.' },
+    { title: 'درخواست‌های چندرفتی (MRTR)', body: 'به‌جای نگه‌داشتن یک Stream باز برای Elicitation/Sampling/Roots، سرور نتیجه را resultType: "input_required" برمی‌گرداند و Client با پاسخ در inputResponses دوباره تلاش می‌کند.' },
+    { title: 'نتایج List قابل‌کش', body: 'پاسخ‌های tools/list، prompts/list، resources/list و resources/read شامل ttlMs و cacheScope شده و ترتیب خروجی قطعی (Deterministic) است.' },
+    { title: 'Tasks به‌عنوان Extension', body: 'قابلیت Tasks از هسته آزمایشی به Extension رسمی io.modelcontextprotocol/tasks منتقل شده، با Polling از طریق tasks/get و اعلان تغییر از طریق subscriptions/listen.' },
+  ]}
+/>
+
+<Callout type="fact" title="واقعیت تأییدشده">
+  در بخش احراز هویت، سرورهای مجوزدهی باید پارامتر iss طبق RFC 9207 را
+  برگردانند و Client پیش از تبدیل کد به Token باید آن را بررسی کند — این
+  حفرهٔ «ترکیب‌شدن سرورهای مجوزدهی» (Authorization-server Mix-up) را
+  می‌بندد. Dynamic Client Registration (DCR) رسماً منسوخ شده و Client ID
+  Metadata Documents (CIMD) روش ترجیحی تازه است، هرچند DCR هنوز کار
+  می‌کند. این جزئیات مستقیماً از صفحهٔ رسمی Changelog مشخصات گرفته شده‌اند.
+</Callout>
+
+<Callout type="analysis" title="تحلیل/ادعای منبع">
+  طبق تحلیل مستقل WorkOS، این نسخه هم‌راستاییِ MCP را با OAuth 2.1 و OpenID
+  Connect جدی‌تر کرده (از جمله الزام Resource Indicators طبق RFC 8707 برای
+  جلوگیری از سوءاستفاده از Token در سرورهای دیگر)، و استدلال می‌کند که پیش
+  از این، احراز هویت MCP عمدتاً به سلیقهٔ پیاده‌سازها واگذار شده بود. این
+  یک قضاوت تحلیلی از یک منبع ثالث (یک شرکت ارائه‌دهندهٔ زیرساخت احراز
+  هویت) است، نه متن رسمی خودِ مشخصات.
+</Callout>
+
+## چه زمانی و برای چه کسی کاربرد دارد؟
+
+این تغییرات برای هر تیمی که یک MCP Server تولیدی را پشتِ چند Instance و
+یک Load Balancer معمولی (بدون Session Storage مشترک) اجرا می‌کند حیاتی
+است — چون دیگر هر درخواست می‌تواند بدون نیاز به چسبندگیِ Session
+(Session Affinity) روی هر Instance پردازش شود. طبق راهنمای مهاجرتِ خودِ
+تیم MCP، کدی که به شناسهٔ Session وابسته بود باید بازنویسی شود: به‌جای
+تکیه بر وضعیتِ پنهانِ لایهٔ انتقال، باید وضعیت را به‌صورت صریح — مثلاً از
+طریق یک Handle که توسط یک ابزار صادر می‌شود — در آرگومان‌های قابل‌مشاهده
+برای مدل منتقل کرد.
+
+## مقایسه با گزینه‌های مشابه
+
+<ComparisonTable
+  caption="مدیریت وضعیت در MCP: قبل و بعد از نسخهٔ ۲۰۲۶-۰۷-۲۸"
+  headers={['جنبه', 'پیش از این نسخه', 'پس از این نسخه']}
+  rows={[
+    ['مدیریت Session', 'Handshake اولیه + هدر Mcp-Session-Id', 'بدون Handshake؛ هر درخواست مستقل و خودکفا'],
+    ['درخواست‌های سمتِ سرور (Elicitation/Sampling)', 'نیاز به Stream باز و نگه‌داشته‌شده', 'الگوی Request/Response با resultType: input_required'],
+    ['ثبت Client', 'Dynamic Client Registration (RFC 7591)', 'Client ID Metadata Documents (ترجیحی)؛ DCR منسوخ'],
+    ['مقیاس‌پذیری پشتِ Load Balancer', 'نیاز به Session Affinity یا ذخیرهٔ وضعیت مشترک', 'Round-robin ساده، بدون وضعیت مشترک'],
+  ]}
+/>
+
+نکتهٔ مهم برای هر تیمی که می‌خواهد مهاجرت کند: خودِ تیم MCP تأکید می‌کند
+که هزینهٔ این مهاجرت، به‌خصوص برای اپلیکیشن‌هایی که به شناسهٔ Session
+وابسته بودند، واقعی و قابل‌توجه است — این یک بروزرسانیِ کوچک و بی‌دردسر
+نیست، بلکه یک تغییر معماری است که باید از قبل برایش برنامه‌ریزی کرد.
