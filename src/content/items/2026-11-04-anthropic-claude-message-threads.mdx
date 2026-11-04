@@ -1,0 +1,113 @@
+---
+title: "Message Threads: نگهداری مکالمه در سمت سرور برای Messages API کلود"
+date: 2026-11-04
+originalDate: 2026-11-02
+source: "Anthropic (مستندات رسمی Claude Platform و گزارش‌های Unite.AI، AlphaSignal)"
+url: "https://platform.claude.com/docs/en/api/go/beta/sessions/threads"
+category: "ai-engineering"
+kind: "technique"
+verified: true
+tags: ["anthropic", "claude", "api", "context-engineering", "latency", "agents"]
+summary: >
+  Anthropic ویژگی Beta به‌نام «Message Threads» را برای Messages API کلود
+  منتشر کرد: سرور خودِ مکالمه را نگه می‌دارد و در هر نوبت فقط پیام‌های
+  جدید ارسال می‌شود، نه کل تاریخچه. نتیجهٔ گزارش‌شده توسط Anthropic:
+  کاهش حدود ۳۵٪ در میانهٔ زمان تا اولین توکن (Time To First Token) برای
+  درخواست‌های ۵۰۰هزار تا یک‌میلیون توکنی در Claude Code — بدون تغییر در
+  مصرف توکن یا هزینه، چون کلود همچنان کل مکالمه را در هر نوبت می‌خواند.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چرا الان مطرح شده؟
+
+در معماری معمول Agentهای مبتنی بر Claude API — مثل Claude Code یا یک
+Agent با Computer Use — هر نوبت گفت‌وگو باید کل تاریخچهٔ مکالمه (پیام‌های
+قبلی، System Prompt، تعریف Toolها) را دوباره در درخواست HTTP ارسال کند،
+چون API به‌طور پیش‌فرض Stateless است. در مکالمات طولانی (مثلاً Agentی که
+صدها هزار توکن کانتکست دارد)، همین ارسال و اعتبارسنجی مجدد حجم بزرگ داده
+در هر نوبت، بخشی قابل‌توجه از تأخیر کلی را تشکیل می‌دهد — جدا از زمان
+خودِ Inference مدل. Anthropic در ۲ نوامبر ۲۰۲۶ ویژگی Message Threads را
+در Beta عمومی منتشر کرد تا دقیقاً همین بخش از تأخیر را حذف کند.
+
+<KeyFacts
+  facts={[
+    { label: 'ناشر و تاریخ', value: 'Anthropic — ۲ نوامبر ۲۰۲۶ (Public Beta)' },
+    { label: 'مشکل هدف', value: 'ارسال و پردازش مجدد کل تاریخچهٔ مکالمه در هر نوبت' },
+    { label: 'بهبود تأخیر گزارش‌شده', value: '~۳۵٪ کاهش میانهٔ Time-to-First-Token (درخواست‌های ۵۰۰هزار تا ۱میلیون توکنی)' },
+    { label: 'تأثیر بر مصرف توکن', value: 'بدون تغییر — کلود همچنان کل مکالمه را می‌خواند' },
+    { label: 'انقضای Thread', value: '۵ دقیقه پس از آخرین درخواست؛ حداکثر نگهداری محتوا تا ۱ ساعت' },
+  ]}
+/>
+
+## چگونه کار می‌کند؟
+
+به‌جای ارسال کل مکالمه در هر Request، کلاینت یک Thread می‌سازد و فقط
+پیام‌های تازه را به آن اضافه می‌کند؛ سرور Anthropic خودِ تاریخچه را نگه
+می‌دارد.
+
+<ProcessSteps
+  title="چرخهٔ کار با Message Threads"
+  steps={[
+    {
+      title: 'درخواست Create',
+      body: 'اولین درخواست، کل مکالمه، System Prompt و تعریف Toolها را همراه با پارامتر thread ارسال می‌کند. سرور این محتوا و پاسخ کلود را زیر یک Response ID ذخیره می‌کند.',
+    },
+    {
+      title: 'درخواست‌های Continue بعدی',
+      body: 'هر نوبت بعدی فقط پیام‌های جدید و همان Response ID قبلی را می‌فرستد؛ System Prompt و Tools دوباره ارسال نمی‌شوند. پاسخ جدید خودش Response ID بعدی را می‌سازد.',
+    },
+    {
+      title: 'مسئولیت نگهداری تاریخچه با کلاینت است',
+      body: 'برنامهٔ کلاینت همچنان باید نسخهٔ کامل مکالمه را خودش نگه دارد؛ اگر Thread دیگر قابل ادامه نباشد (مثلاً منقضی شده)، باید دوباره یک درخواست Create کامل بفرستد.',
+    },
+    {
+      title: 'Cache Breakpoint دستی',
+      body: 'Threads به‌خودی‌خود Prompt Caching نمی‌کند؛ توسعه‌دهنده باید حداکثر تا ۴ نقطهٔ Cache Breakpoint را در هر درخواست Threaded مشخص کند تا از کش بهره ببرد.',
+    },
+  ]}
+/>
+
+<Callout type="fact" title="واقعیت تأییدشده">
+  طبق مستندات رسمی و گزارش‌های بازتابی، Thread پنج دقیقه پس از آخرین
+  درخواست منقضی می‌شود (هر پاسخ تازه این تایمر را ریست می‌کند) و محتوای
+  آن حداکثر تا یک ساعت پس از آخرین استفاده حذف می‌شود؛ API ای برای
+  فهرست، خوانش یا حذف دستی Threadها وجود ندارد. Threads از Message
+  Batches، Token Counting، Compaction درخواستی و بیشتر قابلیت‌های
+  Context Editing پشتیبانی نمی‌کند و برای سازمان‌هایی با Inference
+  Hooks فعال، یا نیاز به Zero Data Retention/HIPAA، در دسترس نیست.
+</Callout>
+
+<Callout type="analysis" title="تحلیل/ادعای منبع">
+  عدد ۳۵٪ کاهش Time-to-First-Token، ادعای خودِ Anthropic است و مبنای
+  دقیق مقایسه (کدام نسخهٔ قبلی، چه نوع بار کاری) در گزارش‌های بازتابی
+  مشخص نشده. همچنین ادعای رایج در برخی گزارش‌های ثانویه — کاهش حجم
+  درخواست از ۸۰۰ کیلوبایت به ۱.۸ کیلوبایت — در منبع اصلی‌ای که این مطلب
+  بر پایهٔ آن نوشته شده تأیید نشد؛ پس این مطلب فقط به عدد ۳۵٪ TTFT
+  (که در چند منبع مستقل تکرار شده) به‌عنوان ادعای گزارش‌شده اشاره می‌کند،
+  نه یک واقعیت با منبع اولیهٔ کامل.
+</Callout>
+
+## چه زمانی و برای چه کسی کاربرد دارد؟
+
+این قابلیت دقیقاً برای Agentهای بلندمدت طراحی شده: Coding Agentها
+(مثل Claude Code)، Agentهای Computer-Use، و هر Workflowای که مکالمه را
+در طول صدها هزار توکن کانتکست ادامه می‌دهد. چون مصرف توکن تغییر
+نمی‌کند، سود اصلی صرفاً کاهش تأخیر ادراک‌شده توسط کاربر/Agent است، نه
+کاهش هزینه. Threads به‌صورت پیش‌فرض برای بیشتر کاربران Claude Code فعال
+شده و روی پلتفرم بومی Claude، AWS، Microsoft Foundry و Google Cloud (در
+دسترس است؛ تیم‌هایی که از Zero Data Retention یا HIPAA استفاده می‌کنند
+نمی‌توانند از آن بهره ببرند و باید منتظر گسترش دسترسی بمانند.
+
+## مقایسه با گزینه‌های مشابه
+
+این الگو از نظر مفهومی به Context Caching سمت سرور در سایر پلتفرم‌ها
+(مثل Context Caching در Gemini یا Prompt Caching خودِ Anthropic) شبیه
+است، اما هدفش متفاوت است: Prompt Caching هزینه و توکن را کاهش می‌دهد،
+در حالی که Threads صرفاً از ارسال مجدد دادهٔ تکراری در شبکه و
+Tokenization مجدد آن جلوگیری می‌کند — هزینهٔ توکن کلود دست‌نخورده
+می‌ماند. برای بهترین نتیجه، این دو تکنیک مکمل هم‌اند: Threads برای
+کاهش سربار شبکه/درخواست، و Cache Breakpointهای دستی درون همان Thread
+برای کاهش هزینهٔ واقعی توکن.
