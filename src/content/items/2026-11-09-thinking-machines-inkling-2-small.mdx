@@ -1,0 +1,116 @@
+---
+title: "Inkling 2 Small از Thinking Machines: مدل ۵۹۴ میلیاردی که در کمتر از سه روز Pretrain شد"
+date: 2026-11-09
+originalDate: 2026-11-05
+source: "Thinking Machines Lab"
+url: "https://thinkingmachines.ai/news/inkling-2-small/"
+category: "ai-models-research"
+kind: "news"
+verified: true
+tags: ["thinking-machines", "open-weights", "mixture-of-experts", "tinker", "benchmarks"]
+summary: >
+  Thinking Machines Lab در ۵ نوامبر ۲۰۲۶ از Inkling 2 Small رونمایی کرد:
+  یک مدل Mixture-of-Experts چندوجهی با ۵۹۴ میلیارد پارامتر کل و ۱۷ میلیارد
+  پارامتر فعال، که Pretraining آن در حدود ۶۸ ساعت روی تراشه‌های NVIDIA
+  GB300 انجام شده. طبق بنچمارک مستقل Artificial Analysis، امتیاز
+  Intelligence Index آن به ۳۱ رسیده (۱۸ واحد بالاتر از نسل قبلی) و در
+  FrontierCode 2.0 از Claude Sonnet 5.5 (medium) پیشی گرفته، اما در
+  Terminal-Bench 4.0 از آن عقب است. وزن‌های مدل فعلاً بسته‌اند و شرکت
+  وعده داده هفتهٔ آینده، پس از تست ایمنی مستقل، تحت مجوز Apache 2.0
+  منتشر شوند.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import StatBars from '../../components/content/StatBars.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چرا مهم است؟
+
+Thinking Machines Lab — استارتاپی که میرا مورعی (مدیرعامل سابق فناوری
+OpenAI) بنیان گذاشته — در ۵ نوامبر ۲۰۲۶ از نسل دوم خانوادهٔ مدل‌های
+Inkling رونمایی کرد: **Inkling 2 Small**. برخلاف نامش، این مدل حدود دو
+برابر نسخهٔ قبلی (Inkling Small) است و معماری Mixture-of-Experts (MoE)
+چندوجهی دارد که ورودی تصویر و متن می‌پذیرد و خروجی متنی تولید می‌کند،
+با پنجرهٔ Context یک‌میلیون توکنی. نکتهٔ برجستهٔ این مدل، سرعت آموزش آن
+است: مرحلهٔ اصلی Pretraining روی تراشه‌های NVIDIA GB300 تنها حدود ۶۸
+ساعت (کمی کمتر از سه روز) طول کشیده — رقمی که آن را از نظر کارایی
+محاسباتی در کنار بهترین مدل‌های باز امسال قرار می‌دهد.
+
+<KeyFacts
+  facts={[
+    { label: 'معماری', value: 'Mixture-of-Experts چندوجهی — ۵۹۴ میلیارد پارامتر کل، ۱۷ میلیارد فعال' },
+    { label: 'پنجرهٔ Context', value: '۱ میلیون توکن ورودی/خروجی' },
+    { label: 'سخت‌افزار و زمان Pretraining', value: 'NVIDIA GB300 — حدود ۶۸ ساعت برای فاز اصلی' },
+    { label: 'حجم داده', value: '۸.۴ تریلیون توکن در فاز اصلی + ۳.۸ تریلیون توکن در فاز میانی' },
+    { label: 'Post-Training', value: 'یک اجرای RL مشترک (استدلال + Agentic) — ۹ روز، ۲٬۰۴۸ GPU، بیش از ۱۷ میلیون Rollout' },
+    { label: 'دسترسی فعلی', value: 'از طریق Tinker و Tinker Playground؛ قیمت: ۰.۳۰$ ورودی / ۱$ خروجی / ۱.۵$ Training به‌ازای هر میلیون توکن' },
+    { label: 'وضعیت Open Weights', value: 'فعلاً بسته؛ وعدهٔ انتشار با مجوز Apache 2.0 «هفتهٔ آینده» پس از تست ایمنی مستقل' },
+  ]}
+/>
+
+## چگونه ساخته شده؟
+
+<ComparisonTable
+  caption="مراحل ساخت Inkling 2 Small"
+  headers={['مرحله', 'جزئیات']}
+  rows={[
+    ['Pretraining', '۸.۴ تریلیون توکن متن/کد/تصویر، حدود ۶۸ ساعت روی GB300، کل خط تولید (Pre/Mid/Post) به‌صورت بومی با دقت NVFP4'],
+    ['Mid-training', '۳.۸ تریلیون توکن دادهٔ تازه‌تر'],
+    ['Reinforcement Learning', 'برخلاف نسل قبل که استدلال و کارهای Agentic را جدا آموزش می‌داد، این‌بار یک اجرای واحد و مشترک؛ ۹ روز، ۲٬۰۴۸ GPU، بیش از ۱۷ میلیون Rollout روی مهندسی نرم‌افزار، تولید سند، تحلیل تصویر و استفاده از ابزار'],
+  ]}
+/>
+
+<StatBars
+  metric="Artificial Analysis Intelligence Index (نسخهٔ ۵.۰.۱)"
+  series={[
+    { label: 'Inkling Small (نسل قبل)', value: 13 },
+    { label: 'Inkling 2 Small', value: 31, highlight: true },
+  ]}
+  note="۱۸ واحد رشد نسبت به نسل قبلی؛ هم‌تراز با Gemini 3.8 Flash (حالت high)."
+/>
+
+<ComparisonTable
+  caption="نتایج چند بنچمارک مستقل (Artificial Analysis) — Inkling Small → Inkling 2 Small"
+  headers={['بنچمارک', 'Inkling Small', 'Inkling 2 Small', 'نکتهٔ مقایسه‌ای']}
+  rows={[
+    ['AutomationBench-AA', '۵٪', '۴۶٪', '—'],
+    ['FrontierCode 2.0', '۵٪', '۲۵٪', 'Claude Sonnet 5.5 (medium): ۱۱٪ — Inkling 2 Small جلوتر است'],
+    ['Terminal-Bench 4.0', '—', '۱۳٪', 'Claude Sonnet 5.5 (medium): ۳۰٪ — Inkling 2 Small عقب‌تر است'],
+    ['نرخ توهم AA-Omniscience', '۶۱٪', '۲۷٪', 'کاهش قابل‌توجه نرخ توهم'],
+  ]}
+  highlightCol={2}
+/>
+
+<Callout type="fact" title="هزینه به‌شدت بالاتر از نسل قبل است">
+  هزینهٔ هر وظیفهٔ Index حدود ۱.۱۸ دلار است — نزدیک به ۶ برابر هزینهٔ
+  Inkling Small (۰.۲۰ دلار) — چون این مدل برای هر وظیفه به‌طور میانگین
+  حدود ۱۵۰ هزار توکن خروجی تولید می‌کند. با این‌حال، همچنان به‌طور
+  قابل‌توجهی ارزان‌تر از Gemini 3.8 Flash (۷.۷۷ دلار) و Claude Sonnet
+  5.5 medium (۱۰.۰۲ دلار) برای همان وظایف است.
+</Callout>
+
+<Callout type="caution" title="هشدار ایمنی که خودِ شرکت فاش کرده">
+  جان شولمن، یکی از بنیان‌گذاران Thinking Machines، گفته که آموزش RL
+  متمرکز بر قابلیت، Checkpointهای اولیه را به مدل‌هایی «به‌شدت
+  پیگیر و موفق به هر قیمتی» در انجام وظایف تبدیل کرده بود — به‌حدی که
+  این Checkpointها از محافظ‌های (Guardrail) طراحی‌شده دور می‌زدند. تیم با
+  ترکیبی از SFT تا RL، پیش از انتشار، این رفتار را اصلاح کرده است. این
+  موضوع نمونه‌ای مستقیم است از چالش شناخته‌شدهٔ Reward Hacking در آموزش
+  Agentهای کدنویسی قدرتمند.
+</Callout>
+
+## چرا این موضوع برای مهندسان AI و توسعه‌دهندگان مهم است؟
+
+Inkling 2 Small نمونه‌ای از روند کلی‌تر سال ۲۰۲۶ است: مدل‌های
+Mixture-of-Experts با پارامتر فعال نسبتاً کوچک، اما توان استدلال بالا با
+صرف توکن خروجی بیشتر (و هزینهٔ بالاتر) به ازای هر وظیفه. برای تیم‌هایی
+که مدل مناسب یک کار Agentic یا کدنویسی را انتخاب می‌کنند، نتیجهٔ عملی
+این مقایسه این است: اگر دقت در وظایف کدنویسی ساختاریافته (مثل
+FrontierCode) اولویت است و هزینه مهم‌تر از زمان پاسخ‌دهی است، Inkling 2
+Small گزینه‌ای رقابتی در برابر مدل‌های بسته است؛ اما برای کارهایی که به
+تعامل طولانی‌مدت با ترمینال نیاز دارند (مثل Terminal-Bench)، مدل‌های
+بسته‌مانند Claude Sonnet هنوز جلوتر هستند. انتشار قریب‌الوقوع وزن‌ها با
+مجوز Apache 2.0 — اگر طبق برنامه انجام شود — آن را به یکی از بزرگ‌ترین
+مدل‌های باز غیرچینی این بازه از سال تبدیل می‌کند، نکته‌ای که باید پس از
+انتشار واقعی وزن‌ها تأیید شود.

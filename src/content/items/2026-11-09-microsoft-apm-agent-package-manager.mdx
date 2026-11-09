@@ -1,0 +1,102 @@
+---
+title: "APM مایکروسافت: چیزی شبیه npm برای Context و مهارت‌های Agentهای کدنویسی"
+date: 2026-11-09
+originalDate: 2026-04-30
+source: "Microsoft (پروژهٔ متن‌باز microsoft/apm)"
+url: "https://microsoft.github.io/apm/"
+category: "ai-coding-dev-tools"
+kind: "reference"
+verified: true
+tags: ["apm", "agent-skills", "mcp", "developer-tools", "context-engineering"]
+summary: >
+  APM (Agent Package Manager) پروژهٔ متن‌باز و رایگان مایکروسافت (مجوز
+  MIT) است که مدیریت نسخه و توزیع Context ایجنت‌های کدنویسی — شامل
+  Instructionها، Skillها و سرورهای MCP — را مثل یک Package Manager
+  معمولی (شبیه npm) حل می‌کند. با یک فایل apm.yml در ریشهٔ مخزن و دستور
+  apm install، تنظیمات AI به‌طور یکسان روی GitHub Copilot، Claude Code،
+  Cursor، Codex، Gemini و چند ابزار دیگر اعمال می‌شود؛ یک Lockfile با
+  Hash محتوا، بازتولید دقیق همان نسخه را تضمین می‌کند.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چه مشکلی را حل می‌کند؟
+
+تیم‌هایی که همزمان از چند ابزار کدنویسی AI استفاده می‌کنند — مثلاً یک
+نفر با GitHub Copilot کار می‌کند، دیگری با Claude Code و سومی با Cursor
+— معمولاً باید Instructionها، Promptها، Skillها و تنظیمات سرورهای MCP
+را برای هر ابزار جدا و به‌صورت دستی تنظیم کنند. این تنظیمات معمولاً وقتی
+یک همکار تازه مخزن را Clone می‌کند یا پروژه را روی ماشین دیگری اجرا
+می‌کند، از دست می‌رود یا باید دوباره از صفر ساخته شود. **APM (Agent
+Package Manager)**، پروژهٔ متن‌باز مایکروسافت، همین مشکل را حل می‌کند:
+دقیقاً مثل این‌که `package.json` و `npm install` وابستگی‌های کد یک
+پروژه را مدیریت می‌کنند، APM وابستگی‌های «Context» یک پروژه AI — یعنی
+Instructionها، Skillها، Agentها، Promptها و سرورهای MCP — را در یک فایل
+`apm.yml` ثابت و قابل‌نسخه‌بندی اعلام و نصب می‌کند.
+
+<KeyFacts
+  facts={[
+    { label: 'نوع پروژه', value: 'ابزار متن‌باز مایکروسافت، مجوز MIT' },
+    { label: 'استعارهٔ رسمی', value: '«مثل npm، اما برای Context ایجنت‌ها»' },
+    { label: 'فایل اصلی اعلام وابستگی', value: 'apm.yml — شبیه package.json، شامل dependencies.apm و dependencies.mcp' },
+    { label: 'دستور نصب', value: 'apm install — روی یک Clone تازه: git clone … && cd … && apm install' },
+    { label: 'ابزارهای پشتیبانی‌شده', value: 'GitHub Copilot، Claude Code، Grok Build، Cursor، OpenCode، Codex، Gemini، Windsurf، Kiro' },
+    { label: 'ساخته‌شده روی', value: 'AGENTS.md، Agent Skills و پروتکل MCP' },
+  ]}
+/>
+
+## چگونه کار می‌کند؟
+
+<ProcessSteps
+  title="از apm.yml تا نصب در هر ابزار"
+  steps={[
+    { title: '۱. اعلام وابستگی در apm.yml', body: 'نگهدارندهٔ پروژه، Skillها، Promptها، Agentها و سرورهای MCP لازم را در apm.yml (شبیه package.json) اعلام می‌کند. منبع هر وابستگی می‌تواند یک مخزن گیت‌هاب یا هر میزبان Git دیگر (GitLab، Azure DevOps، Bitbucket، Gitea) باشد.' },
+    { title: '۲. نسخه‌بندی با Git Ref', body: 'هر وابستگی می‌تواند به یک Tag (مثل #v2.1)، یک Branch (مثل #main)، یا یک فیلد ref مشخص Pin شود.' },
+    { title: '۳. اجرای apm install', body: 'این دستور هر Primitive (Skill، Prompt، Agent، Instruction، Plugin، MCP) را در هر Harness پشتیبانی‌شده مستقر می‌کند؛ روی یک Clone تازه فقط یک دستور لازم است.' },
+    { title: '۴. قفل‌شدن نسخه‌ها با Lockfile', body: 'یک Lockfile نسخهٔ دقیق و Hash محتوای هر بسته را ثبت می‌کند تا یک Clone تازه، همان محتوای دقیق را بازتولید کند — نه نسخهٔ متفاوتی که ممکن است بعداً منتشر شده باشد.' },
+    { title: '۵. اعمال سیاست امنیتی', body: 'یک فایل apm-policy.yml در زمان نصب اعمال می‌شود؛ تنظیمات سیاست فقط می‌توانند از سطح Enterprise به سازمان و از سازمان به مخزن سخت‌گیرانه‌تر شوند، نه برعکس.' },
+  ]}
+/>
+
+<Callout type="fact" title="اقدامات امنیتی داخلی زمان نصب">
+  طبق مستندات پروژه، هر نصب به‌صورت خودکار دنبال کاراکترهای Unicode
+  پنهان می‌گردد، Hash محتوای هر بسته را Pin می‌کند، و سرورهای MCP که
+  به‌صورت غیرمستقیم (Transitive) از طریق یک بستهٔ دیگر وارد می‌شوند را
+  مسدود می‌کند مگر این‌که صریحاً اعلام یا تأیید شده باشند.
+</Callout>
+
+<ComparisonTable
+  caption="APM در مقابل روش دستی رایج برای مدیریت تنظیمات AI چندابزاره"
+  headers={['ویژگی', 'روش دستی معمول', 'با APM']}
+  rows={[
+    ['هم‌زمان‌سازی بین ابزارها (Copilot، Claude Code، Cursor، …)', 'تنظیم جدا برای هر ابزار', 'یک apm.yml برای همهٔ ابزارهای پشتیبانی‌شده'],
+    ['راه‌اندازی روی Clone تازه', 'بازسازی دستی تنظیمات', 'یک دستور: apm install'],
+    ['تضمین نسخهٔ یکسان بین اعضای تیم', 'وابسته به هماهنگی دستی', 'Lockfile با Hash محتوا'],
+    ['کنترل منابع مجاز در سطح سازمان', 'معمولاً وجود ندارد', 'apm-policy.yml با وراثت سخت‌گیرانه از بالا به پایین'],
+  ]}
+/>
+
+<Callout type="analysis" title="بلوغ پروژه و دقت فرمت مانیفست">
+  مستندات رسمی خودِ پروژه فرمت فایل apm.yml را یک «قرارداد در حال تکمیل»
+  (Working-Draft) توصیف می‌کند و می‌گوید نسخه‌های قدیمی‌تر این فرمت، شکل
+  «Git به‌همراه مسیر» را نمی‌پذیرفتند. این یعنی ساختار دقیق فایل ممکن
+  است هنوز تغییر کند؛ پروژه سطح بلوغ رسمی (مثل GA یا Beta) را اعلام
+  نکرده، فقط آن را «متن‌باز» معرفی می‌کند. تیم‌هایی که می‌خواهند از آن
+  در زیرساخت CI/CD حساس استفاده کنند، باید نسخه‌های apm.yml را با دقت
+  Pin کنند و به‌روزرسانی‌های فرمت را دنبال کنند.
+</Callout>
+
+## چرا این موضوع برای مهندسی AI و Vibe Coding مهم است؟
+
+APM نمونه‌ای از یک الگوی مهم‌تر در حال شکل‌گیری در مهندسی AI است: هر
+اندازه که Skillها، Promptها و تنظیمات MCP پیچیده‌تر و حیاتی‌تر در گردش‌کار
+روزانهٔ تیم‌ها می‌شوند، نیاز به زیرساختی برای نسخه‌بندی، توزیع و
+بازتولیدپذیری آن‌ها — دقیقاً مثل کد خودِ برنامه — بیشتر می‌شود. برای
+تیم‌هایی که در حال حاضر از چند ابزار کدنویسی AI به‌صورت موازی استفاده
+می‌کنند یا با مشکل «روی ماشین من کار می‌کرد» در تنظیمات AI مواجه‌اند،
+APM یک راه‌حل عملی و رایگان برای رسیدن به یک منبع واحد و قابل‌اعتماد از
+Context است — هرچند باید توجه داشت که این ابزار همچنان در مراحل اولیهٔ
+تکامل فرمت خود قرار دارد.
