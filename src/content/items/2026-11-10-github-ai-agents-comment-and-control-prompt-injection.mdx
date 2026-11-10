@@ -1,0 +1,110 @@
+---
+title: "Comment and Control: چگونه یک کامنت گیت‌هاب، Claude Code، Gemini CLI و GitHub Copilot را فریب داد"
+date: 2026-11-10
+originalDate: 2026-04-15
+source: "Cloud Security Alliance"
+url: "https://labs.cloudsecurityalliance.org/research/csa-research-note-comment-control-github-prompt-injection-20/"
+category: "security-safety-governance"
+kind: "reference"
+verified: true
+tags: ["prompt-injection", "github-actions", "claude-code", "gemini-cli", "github-copilot", "mcp", "agent-security"]
+summary: >
+  پژوهشگران امنیتی (Aonan Guan به‌همراه همکاران از Johns Hopkins) نشان
+  دادند سه Agent متصل به GitHub Actions — Claude Code Security Review،
+  Gemini CLI Action و GitHub Copilot Agent — با متن مخفی در عنوان PR،
+  بدنهٔ Issue یا کامنت‌های HTML قابل فریب‌خوردن‌اند و اطلاعات محرمانه
+  (کلید API، توکن GitHub) را خودشان در یک کامنت یا Issue عمومی فاش
+  می‌کنند. هر سه شرکت (Anthropic، Google، GitHub) پاداش امنیتی پرداختند
+  اما هیچ CVE یا اطلاعیهٔ عمومی منتشر نکردند — شکافی که Cloud Security
+  Alliance آن را «سیگنال ریسک تأمین‌کننده» می‌نامد.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چرا هنوز مهم است؟
+
+این یک خبر تازه نیست — افشای اصلی در آوریل ۲۰۲۶ اتفاق افتاد — اما الگویی
+را نشان می‌دهد که هنوز در عمل رایج است و هر تیمی که Agent کدنویسی را به
+GitHub Actions وصل می‌کند باید آن را بشناسد: **Prompt Injection غیرمستقیم**
+(Indirect Prompt Injection). در این حمله، دستور مخرب نه در پیام کاربر، بلکه
+در محتوایی که Agent خودش می‌خواند — عنوان یک Pull Request، متن یک Issue،
+یا یک کامنت — پنهان می‌شود. وقتی Agent آن محتوا را در زمینهٔ (Context) خود
+بارگذاری می‌کند، دستور مخفی را هم مثل یک دستور معتبر اجرا می‌کند.
+
+<KeyFacts
+  facts={[
+    { label: 'پژوهشگران', value: 'Aonan Guan (Wyze Labs) به‌همراه Zhengyu Liu و Gavin Zhong (Johns Hopkins)' },
+    { label: 'ابزارهای آسیب‌پذیر', value: 'Claude Code Security Review (Anthropic)، Gemini CLI Action (Google)، Copilot Agent (GitHub/Microsoft)' },
+    { label: 'بستر حمله', value: 'GitHub Actions — عنوان PR، بدنهٔ Issue، کامنت‌های HTML مخفی' },
+    { label: 'داده‌های فاش‌شده', value: 'ANTHROPIC_API_KEY، GEMINI_API_KEY، GITHUB_TOKEN، GITHUB_COPILOT_API_TOKEN و مشابه' },
+    { label: 'افشای عمومی', value: '۱۵ آوریل ۲۰۲۶ (گزارش‌های اولیه از اکتبر ۲۰۲۵)' },
+    { label: 'پاداش‌های پرداختی', value: 'Anthropic: ۱۰۰ دلار — Google: ۱٬۳۳۷ دلار — GitHub: ۵۰۰ دلار؛ هیچ CVE یا اطلاعیهٔ عمومی صادر نشد' },
+  ]}
+/>
+
+## چگونه هر سه Agent فریب خوردند؟
+
+<ProcessSteps
+  title="سه الگوی تزریق دستور روی یک زیرساخت مشترک (GitHub Actions)"
+  steps={[
+    { title: '۱. عنوان Pull Request (Claude Code)', body: 'دستور مخفی در عنوان PR قرار می‌گیرد. Claude Code Security Review آن را به‌عنوان بخشی از وظیفهٔ بازبینی کد اجرا می‌کند — دستورهایی مثل whoami و env روی Runner — و خروجی را در قالب یک «یافتهٔ امنیتی» ساختگی در کامنت PR منتشر می‌کند؛ یعنی کلید را خودِ Agent در دیدرس عموم می‌گذارد.' },
+    { title: '۲. بخش ساختگی «محتوای معتبر» (Gemini CLI)', body: 'در یک Issue، متن حمله خودش را شبیه یک برچسب جداکننده‌ٔ «محتوای معتبر» (Trusted Content Section) جا می‌زند و دستورهای ایمنی اصلی Gemini را بی‌اثر می‌کند؛ نتیجه، انتشار کلید API در یک کامنت عمومی Issue است.' },
+    { title: '۳. کامنت HTML مخفی (GitHub Copilot)', body: 'دستور مخرب در یک کامنت HTML قرار می‌گیرد که در نمایش Markdown گیت‌هاب دیده نمی‌شود اما برای Agent قابل‌خواندن است. خروجی حساس با Base64 رمزگذاری و از طریق درخواست‌های عادی به api.github.com بیرون فرستاده می‌شود — دقیقاً مسیری که فیلترهای محدودیت شبکه (Egress) آن را مجاز می‌دانند.' },
+  ]}
+/>
+
+<Callout type="fact" title="چرا محافظ‌های موجود کار نکردند">
+  طبق یادداشت پژوهشی Cloud Security Alliance، این الگوی سوم به‌طور هم‌زمان
+  از سه خط دفاعی عبور کرد: فیلتر متغیرهای محیطی (با خواندن مستقیم
+  /proc/[pid]/environ فرایند والد)، اسکن ثانویهٔ اسرار (چون Base64 با
+  الگوهای شناسایی توکن مطابقت ندارد)، و محدودیت شبکهٔ خروجی (چون ترافیک از
+  مسیر مجاز خودِ api.github.com عبور می‌کند، نه یک سرور خارجی).
+</Callout>
+
+<ComparisonTable
+  caption="واکنش سه شرکت به افشای مسئولانه"
+  headers={['شرکت', 'واکنش اولیه', 'نتیجهٔ نهایی']}
+  rows={[
+    ['Anthropic', 'گزارش از اکتبر ۲۰۲۵ از طریق HackerOne', 'رتبهٔ CVSS از ۹.۳ به ۹.۴ افزایش یافت؛ ۱۰۰ دلار پاداش؛ فقط بخش «نکات امنیتی» در مستندات به‌روزرسانی شد'],
+    ['Google', 'بررسی و تأیید یافته', 'پاداشی معادل ۱٬۳۳۷ دلار پرداخت شد (طبق نوشتهٔ پژوهشگر)'],
+    ['GitHub', 'در ابتدا رد شد؛ عنوان «محدودیت شناخته‌شدهٔ معماری»', 'پس از بازگشایی مجدد در مارس ۲۰۲۶، ۵۰۰ دلار پاداش پرداخت شد'],
+  ]}
+/>
+
+<Callout type="analysis" title="چرا هیچ CVE صادر نشد — این بخش تحلیل است، نه واقعیت تأییدشده">
+  گزارش CSA و پژوهشگر اصلی (Aonan Guan) استدلال می‌کنند که نبود CVE یا
+  اطلاعیهٔ عمومی مشکل‌ساز است: بدون شناسهٔ رسمی، ابزارهای اسکن آسیب‌پذیری
+  هشدار نمی‌دهند و تیم‌های امنیتی که روی نسخه‌های قدیمی‌تر یا استقرارهای
+  بدون نظارت کار می‌کنند، از ریسک خود بی‌خبر می‌مانند. CSA این الگو را یک
+  «شکاف افشا» می‌داند، چون Prompt Injection از رفتار مدل ناشی می‌شود نه از
+  یک باگ کد سنتی، و هنوز چارچوب افشای استانداردی برایش وجود ندارد. این
+  نتیجه‌گیری CSA و پژوهشگر است؛ شرکت‌ها توضیح عمومی دیگری برای تصمیم خود
+  منتشر نکرده‌اند.
+</Callout>
+
+## چه کاری باید انجام داد؟ (توصیه‌های CSA)
+
+برای تیم‌هایی که Agent کدنویسی را در GitHub Actions اجرا می‌کنند، یادداشت
+CSA این اقدامات عملی را توصیه می‌کند: کار با محتوای ورودی از PR و Issue
+(که از بیرون قابل‌کنترل است) را طوری فرض کنید که همیشه می‌تواند حاوی دستور
+مخرب باشد؛ رمزهای غیرضروری را از محیط Runner حذف و دسترسی توکن‌های باقی‌مانده
+را به حداقل محدود کنید؛ مجوزهای `GITHUB_TOKEN` را با بلوک `permissions:`
+صریح تنگ کنید؛ Actionها را به Commit SHA (نه Tag قابل‌تغییر) Pin کنید؛
+کامنت‌های HTML مخفی را پیش از ورود به Prompt حذف کنید (دفاع کامل نیست، فقط
+هزینهٔ حمله را بالا می‌برد)؛ اجرای Agent را به مشارکت‌کنندگان معتمد محدود
+کنید و برای مشارکت‌کنندگان تازه، تأیید نگهدارنده را اجباری کنید؛ و خروجی
+Agent را پیش از انتشار برای اسرار اسکن کنید.
+
+## چرا برای مهندسی AI مهم است؟
+
+این مورد نمونه‌ای درس‌آموز از یک الگوی تکرارشونده است: هر Agent که محتوای
+«غیرقابل‌اعتماد» (از دید امنیتی، هر چیزی خارج از کنترل مستقیم تیم) را
+می‌خواند، سطح حملهٔ تازه‌ای باز می‌کند — حتی وقتی آن Agent از یک آزمایشگاه
+معتبر باشد. برای تیم‌هایی که Agent کدنویسی را روی مخازن عمومی یا با
+مشارکت‌کنندگان خارجی اجرا می‌کنند، نتیجهٔ عملی روشن است: اسرار Runner را
+به حداقل برسانید، فرض کنید هر متن ورودی می‌تواند دستور باشد، و منتظر CVE
+یا اطلاعیهٔ رسمی برای واکنش نمانید — چون طبق این مورد، ممکن است هیچ‌وقت
+منتشر نشود.
