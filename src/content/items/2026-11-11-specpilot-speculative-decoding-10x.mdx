@@ -1,0 +1,107 @@
+---
+title: "SpecPilot: وقتی یک حلقهٔ Agent خودش الگوریتم Speculative Decoding را بهینه می‌کند"
+date: 2026-11-11
+originalDate: 2026-11-02
+source: "arXiv"
+url: "https://arxiv.org/abs/2611.02501"
+category: "inference-infrastructure"
+kind: "paper"
+verified: true
+tags: ["speculative-decoding", "inference-optimization", "llm-serving", "quantization", "agentic-optimization"]
+summary: >
+  مقالهٔ SpecPilot (گروهی از پژوهشگران NVIDIA، UC Berkeley، Princeton و
+  Stanford) یک حلقهٔ خودکار مبتنی بر Agent معرفی می‌کند که به‌جای تنظیم
+  دستی Speculative Decoding برای هر سخت‌افزار/مدل، خودش بهینه‌سازی‌های
+  الگوریتمی و سیستمی را کشف و اعتبارسنجی می‌کند. نتیجه: افزایش سرعت
+  Inference نسبت به حالت خودبازگشتی معمولی از ۴٫۴۶ برابر به ۱۰٫۸۷ برابر
+  برای یک درخواست تکی، بدون آموزش مجدد مدل و بدون افت کیفیت خروجی.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import StatBars from '../../components/content/StatBars.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چه مشکلی را حل می‌کند؟
+
+**Speculative Decoding** روشی برای سریع‌تر کردن Inference مدل‌های زبانی
+بزرگ است: به‌جای این‌که مدل اصلی (Target Model) هر Token را یکی‌یکی
+تولید کند، یک مدل کوچک‌تر و سریع‌تر (Draft Model) چند Token را حدس
+می‌زند و مدل اصلی فقط آن‌ها را به‌صورت موازی تأیید یا رد می‌کند. مشکل
+این است که تنظیم بهینهٔ این روش به ترکیب مدل Draft، مدل Target، نوع
+GPU و این‌که درخواست‌ها به‌صورت تکی یا دسته‌ای (Batch) پردازش می‌شوند
+بستگی دارد — و یک تنظیم ثابت برای همهٔ حالت‌ها کار نمی‌کند. برای مثال،
+وقتی درخواست‌ها Batch می‌شوند، هر درخواست به محاسبات Attention و حافظهٔ
+وضعیت جدا نیاز دارد، و این باعث می‌شود شتاب اولیهٔ Speculative Decoding
+تا نیمی کاهش یابد. **SpecPilot** (پژوهشگران NVIDIA، UC Berkeley، Princeton
+و Stanford) به‌جای تنظیم دستی برای هر حالت، یک حلقهٔ Agentic طراحی کرده
+که خودش این بهینه‌سازی‌ها را کشف می‌کند.
+
+<KeyFacts
+  facts={[
+    { label: 'مقاله', value: 'SpecPilot: Autonomous Algorithm Discovery and Systems Optimization for Speculative Decoding' },
+    { label: 'نویسندگان', value: 'Kunjun Li، Wenhao Chai، Yihao Liang، Yuezhou Hu، Shuyao Xu، Yi Pan، William X. Zheng، Kannan Ramchandran، Kurt Keutzer، Jiantao Jiao' },
+    { label: 'تاریخ انتشار', value: '۲ نوامبر ۲۰۲۶ (arXiv:2611.02501، حوزه cs.LG)' },
+    { label: 'نتیجهٔ کلیدی', value: 'شتاب از ۴٫۴۶× به ۱۰٫۸۷× (تک‌درخواست) و از حدی پایین‌تر به ۱٫۹۴×–۳٫۹۳× (Batch)، بدون آموزش و بدون افت کیفیت' },
+    { label: 'کد', value: 'github.com/StargazerX0/SpecPilot' },
+  ]}
+/>
+
+## چگونه حلقهٔ بهینه‌سازی SpecPilot کار می‌کند؟
+
+<ProcessSteps
+  title="از شناسایی گلوگاه تا بهینه‌سازی تأییدشده"
+  steps={[
+    { title: '۱. شناسایی گلوگاه با مدل هزینه', body: 'یک مدل هزینه (Cost Model) مشخص می‌کند کدام بخش از سیستم، بیشترین فاصله تا سقف نظری عملکرد خودش را دارد.' },
+    { title: '۲. پیشنهاد موازی توسط چند Agent', body: 'چند Agent مستقل، تغییرات متفاوتی برای رفع آن گلوگاه پیشنهاد می‌دهند.' },
+    { title: '۳. اعتبارسنجی با Token Forcing', body: 'یک Controller فقط تغییراتی را می‌پذیرد که روی درخواست‌های دیده‌نشده هم سریع‌تر باشند؛ هر Token خروجی در برابر سیستم اصلی بررسی می‌شود تا تغییراتی که صرفاً «کیفیت را قربانی می‌کنند» (Reward Hacking) رد شوند.' },
+    { title: '۴. ذخیره در حافظهٔ ساختاریافته', body: 'تغییرات پذیرفته‌شده به‌صورت Logهای قابل‌بازپخش ذخیره می‌شوند تا بین مدل‌های Draft، مدل‌های Target و GPUهای مختلف قابل‌انتقال باشند.' },
+  ]}
+/>
+
+## چهار تکنیک اصلی کشف‌شده
+
+<ComparisonTable
+  caption="تکنیک‌های اصلی خروجی حلقهٔ SpecPilot"
+  headers={['تکنیک', 'ایده']}
+  rows={[
+    ['فرمت وزن ۱۲بیتی', 'کاهش حجم وزن مدل به حدود ۱۲ بیت به‌ازای هر پارامتر، با محاسبه در Register و خروجی کاملاً یکسان با Full Precision — یعنی Lossless.'],
+    ['Tree Verification', 'تأیید یک درخت از چند Token پیشنهادی به‌جای یک رشتهٔ خطی، روی معماری‌های هیبریدی/بازگشتی.'],
+    ['تأیید دوسطحی', 'یک پیمایش سریع ۸بیتی روی کل درخت، و فقط Tokenهای پذیرفته‌شده با محاسبهٔ کامل‌دقت بررسی می‌شوند.'],
+    ['بودجهٔ گره آگاه از Batch', 'طول پیشنهاد Draft بر اساس نرخ پذیرش اخیر و با بودجهٔ مشترک بین درخواست‌های یک Batch، به‌صورت پویا کوتاه یا بلند می‌شود.'],
+  ]}
+/>
+
+## نتایج اندازه‌گیری‌شده
+
+<StatBars
+  metric="شتاب نسبت به Decoding خودبازگشتی معمولی (تک‌درخواست، روی RTX PRO 6000)"
+  unit="×"
+  series={[
+    { label: 'سیستم پایه (قبل از SpecPilot)', value: 4.46 },
+    { label: 'SpecPilot', value: 10.87, highlight: true },
+  ]}
+  note="مدل: Qwen3.8-27B با Draft از نوع DFlash؛ طبق مقاله، شتاب تک‌درخواست روی GPU H100 در بازهٔ ۳٫۹۵× تا ۸٫۸۶× گزارش شده و روی حالت Batch (با وزن FP8 و Draft از نوع DSpark) به ۱٫۹۴× تا ۳٫۹۳× می‌رسد."
+/>
+
+<Callout type="fact" title="آنچه در این مقاله اندازه‌گیری‌شده، نه تخمینی">
+  اعداد بالا حاصل آزمایش روی چهار مدل Target، سه مدل Draft، دو پلتفرم GPU
+  (RTX PRO 6000 و H100) و پنج Benchmark است، طبق خلاصهٔ خودِ مقاله. تمایز
+  مهم: عدد ۱۰٫۸۷× مخصوص حالت تک‌درخواست و روی یک GPU مشخص است؛ در حالت
+  Batch که به کاربردهای Production نزدیک‌تر است، شتاب به ۱٫۹۴× تا ۳٫۹۳×
+  محدود می‌شود — عددی که در عنوان‌های خبری ساده‌شده معمولاً دیده نمی‌شود.
+</Callout>
+
+## چرا برای مهندسان زیرساخت AI اهمیت دارد؟
+
+نکتهٔ مهم این مقاله فقط عدد شتاب نیست، بلکه خودِ روش: به‌جای این‌که
+مهندسان انسانی برای هر ترکیب جدید از مدل/GPU/Batch Size دستی تنظیم کنند،
+یک حلقهٔ Agentic این کار را انجام می‌دهد و فقط تغییراتی را می‌پذیرد که
+با Token Forcing، تأییدشده و بدون افت کیفیت باشند — الگویی که می‌تواند
+به بهینه‌سازی‌های دیگر زیرساخت Inference (نه فقط Speculative Decoding)
+هم تعمیم یابد. برای تیم‌هایی که مدل‌های بزرگ را Serve می‌کنند، توصیهٔ
+عملی این است: اگر از Speculative Decoding استفاده می‌کنید، شتاب واقعی
+را زیر بار Batch واقعی خودتان بسنجید، نه فقط با عدد تک‌درخواست تبلیغاتی؛
+فاصلهٔ بین ۱۰٫۸۷× و ~۲-۴× در حالت Batch می‌تواند تصمیم‌های ظرفیت و
+هزینهٔ شما را به‌طور قابل‌توجهی تغییر دهد.

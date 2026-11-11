@@ -1,0 +1,99 @@
+---
+title: "از Prompt Engineering تا معماری چندعاملی سازمانی: یک مدل هرمی برای Context Engineering"
+date: 2026-11-11
+originalDate: 2026-03-10
+source: "arXiv"
+url: "https://arxiv.org/abs/2603.09619"
+category: "concepts-techniques"
+kind: "paper"
+verified: true
+tags: ["context-engineering", "prompt-engineering", "multi-agent-systems", "intent-engineering", "specification-engineering"]
+summary: >
+  مقاله‌ای با عنوان «Context Engineering: From Prompts to Corporate
+  Multi-Agent Architecture» استدلال می‌کند که مهندسی Prompt برای Agentهای
+  خودمختار چندمرحله‌ای کافی نیست و سه رشتهٔ تکمیلی و سلسله‌مراتبی پیشنهاد
+  می‌دهد: Context Engineering (مدیریت کل محیط اطلاعاتی Agent)، Intent
+  Engineering (رمزگذاری اهداف سازمانی در زیرساخت Agent) و Specification
+  Engineering (سیاست‌های سازمانی قابل‌خوانش برای ماشین، برای مقیاس‌پذیری).
+  این یک چارچوب مفهومی و تک‌نویسنده است، نه روشی با بنچمارک تجربی.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چه مشکلی را حل می‌کند؟
+
+وقتی مدل‌های زبانی از پاسخ‌دهی به یک Prompt ساده، به Agentهای خودمختاری
+تبدیل شدند که چندین قدم پشت‌سرهم تصمیم می‌گیرند، فراخوانی ابزار می‌کنند و
+با سیستم‌های دیگر تعامل دارند، «نوشتن یک Prompt خوب» دیگر کافی نیست. مقالهٔ
+Vera V. Vishnyakova با عنوان *Context Engineering: From Prompts to Corporate
+Multi-Agent Architecture* این خط فکری را دنبال می‌کند: Prompt Engineering
+روی «چه بپرسیم» تمرکز دارد، اما Context Engineering روی «Agent در لحظهٔ
+تصمیم‌گیری، دقیقاً چه چیزی را می‌بیند و چرا» تمرکز می‌کند — یعنی کل محیط
+اطلاعاتی‌ای که تصمیم Agent در آن شکل می‌گیرد.
+
+<KeyFacts
+  facts={[
+    { label: 'نویسنده', value: 'Vera V. Vishnyakova (تک‌نویسنده)' },
+    { label: 'نوع مقاله', value: 'چارچوب مفهومی و مدل بلوغ هرمی — بدون بنچمارک تجربی' },
+    { label: 'سه لایهٔ هرم', value: 'Context Engineering → Intent Engineering → Specification Engineering (از پایین به بالا، تجمعی)' },
+    { label: 'منبع آمار یادشده در مقاله', value: 'نظرسنجی‌های Deloitte و KPMG (۲۰۲۶)، نه آزمایش خودِ نویسنده' },
+  ]}
+/>
+
+## سه لایهٔ هرم بلوغ
+
+<ProcessSteps
+  title="از یک Prompt تا یک سازمان Agent-محور"
+  steps={[
+    { title: '۱. Context Engineering', body: 'طراحی و مدیریت کل محیط اطلاعاتی یک Agent در لحظهٔ تصمیم‌گیری — نه فقط متن Prompt، بلکه هر چیزی که در دسترس مدل قرار می‌گیرد.' },
+    { title: '۲. Intent Engineering', body: 'رمزگذاری اهداف، اولویت‌ها و معیارهای تصمیم‌گیری سازمان در خودِ زیرساخت Agent، به‌طوری‌که Agent نه‌فقط دستور، بلکه «چرایی» پشت آن را هم در تصمیم‌گیری لحاظ کند.' },
+    { title: '۳. Specification Engineering', body: 'تبدیل سیاست‌های سازمانی به مشخصاتی قابل‌خوانش برای ماشین، تا بتوان Agentها را در مقیاس بزرگ (چند تیم، چند سیستم) بدون نوشتن دستی هر قانون، هماهنگ کرد.' },
+  ]}
+/>
+
+## پنج معیار کیفیت Context
+
+مقاله برای سنجش کیفیت Context که به یک Agent داده می‌شود، پنج معیار
+پیشنهاد می‌دهد:
+
+<ComparisonTable
+  caption="پنج معیار کیفیت Context طبق این مقاله"
+  headers={['معیار', 'توضیح']}
+  rows={[
+    ['ربط (Relevance)', 'آیا اطلاعات ارائه‌شده واقعاً به تصمیم جاری Agent مرتبط است؟'],
+    ['کفایت (Sufficiency)', 'آیا Agent برای تصمیم‌گیری درست، اطلاعات کافی دارد؟'],
+    ['انزوا (Isolation)', 'آیا اطلاعات نامرتبط یا مزاحم از Context دور نگه داشته شده؟'],
+    ['اقتصاد (Economy)', 'آیا حجم Context به‌صرفه است (بدون اتلاف Token/هزینه)؟'],
+    ['ریشه‌شناسی (Provenance)', 'آیا منشأ هر بخش از اطلاعات داخل Context قابل‌ردیابی است؟'],
+  ]}
+/>
+
+<Callout type="analysis" title="این یک چارچوب نظری تک‌نویسنده است، نه یک روش آزموده‌شده">
+  مقاله هیچ بنچمارک تجربی یا مقایسهٔ کمّی با روش‌های دیگر ارائه نمی‌دهد؛
+  استدلال‌هایش بر پایهٔ تجربهٔ شخصی نویسنده در ساخت یک سیستم چندعاملی و
+  مطالعهٔ موردی Klarna است، نه آزمایش کنترل‌شده. آمارهای ذکرشده (مثلاً
+  «۷۵٪ از سازمان‌ها قصد استقرار AI عامل‌محور در دو سال آینده را دارند» از
+  Deloitte، یا گزارش KPMG دربارهٔ افت‌وخیز استقرار Agentها) از منابع
+  شخص‌ثالث نقل شده‌اند، نه یافتهٔ خودِ این مقاله. همچنین مقاله مدعی معرفی
+  روشی به نام «Agentic Context Engineering» است که در متن فقط به‌عنوان یک
+  کار مرتبط دیگر (ACE Framework) به آن ارجاع داده می‌شود؛ محتوای اصلی خودِ
+  این مقاله یک مدل مفهومی/هرمی است، نه یک الگوریتم.
+</Callout>
+
+## چرا برای مهندسان AI مفید است؟
+
+حتی بدون بنچمارک، این چارچوب برای تیم‌هایی که Agentهای سازمانی می‌سازند
+یک زبان مشترک مفید فراهم می‌کند: وقتی یک Agent اشتباه می‌کند، سؤال اول
+نباید «Prompt را چطور عوض کنیم؟» باشد، بلکه «چه چیزی در Context حاضر
+است، آیا مرتبط/کافی/پاک/به‌صرفه/ردیابی‌پذیر هست؟». برای تیم‌هایی که به
+سمت استقرار چند Agent در مقیاس سازمانی حرکت می‌کنند، تفکیک سه‌لایه
+(Context → Intent → Specification) یک نقشهٔ راه ذهنی می‌دهد: ابتدا محیط
+اطلاعاتی هر Agent را درست کنید، سپس اهداف سازمانی را در آن رمزگذاری کنید،
+و در نهایت آن را به سیاست‌هایی قابل‌اجرا توسط ماشین در مقیاس بزرگ تبدیل
+کنید. نکتهٔ احتیاط: چون این یک دیدگاه نظری منتشرشده توسط یک نفر است، قبل
+از پیاده‌سازی در پروژه‌های حساس، بهتر است آن را در کنار تجربه‌های عملی
+تیم‌های دیگر (مثلاً الگوهای Context Engineering که LangChain یا Anthropic
+در مقالات مهندسی خودشان منتشر کرده‌اند) ارزیابی کنید.
