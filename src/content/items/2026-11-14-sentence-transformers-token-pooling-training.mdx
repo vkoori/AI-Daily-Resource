@@ -1,0 +1,96 @@
+---
+title: "آموزش آگاه از Token Pooling: راهی برای فشرده‌سازی بیشتر Embeddingهای چندبرداری بدون افت کیفیت بازیابی"
+date: 2026-11-14
+originalDate: 2026-11-11
+source: "Hugging Face (Sentence Transformers)"
+url: "https://huggingface.co/blog/token-pooling"
+category: "rag-knowledge-systems"
+kind: "technique"
+verified: true
+tags: ["embeddings", "colbert", "rag", "sentence-transformers", "retrieval"]
+summary: >
+  Tom Aarsen از تیم Sentence Transformers (Hugging Face) تکنیک «آموزش
+  آگاه از Token Pooling» را معرفی کرد: روشی برای آموزش مدل‌های Embedding
+  چندبرداری (مثل ColBERT) که به‌جای فشرده‌سازی Embeddingها *بعد* از
+  آموزش عادی، خودِ فشرده‌سازی را در فرآیند آموزش لحاظ می‌کند. طبق آزمایش
+  نویسنده روی بنچمارک NanoBEIR، این روش در فشرده‌سازی ۴ برابری فضای
+  ذخیره، کیفیت بازیابی را از ۹۴.۶٪ به ۹۷.۸٪ از عملکرد حالت فشرده‌نشده
+  افزایش می‌دهد.
+---
+
+import KeyFacts from '../../components/content/KeyFacts.astro';
+import ProcessSteps from '../../components/content/ProcessSteps.astro';
+import ComparisonTable from '../../components/content/ComparisonTable.astro';
+import Callout from '../../components/content/Callout.astro';
+
+## این موضوع چیست و چه مشکلی را حل می‌کند؟
+
+مدل‌های Embedding چندبرداری مثل ColBERT، به‌جای تولید یک بردار برای کل
+سند، برای هر Token یک بردار جدا تولید می‌کنند — که معمولاً دقت بازیابی
+بالاتری نسبت به Embeddingهای تک‌برداری دارد، اما حجم ذخیره‌سازی را به
+شدت بالا می‌برد. Token Pooling روشی رایج برای کاهش این حجم است: چند
+بردار مشابه در یک سند با هم ادغام (Merge) می‌شوند. مشکل این روش این است
+که فشرده‌سازی قوی‌تر، اطلاعات مفید برای تطبیق دقیق را هم از بین می‌برد
+— چون مدل از ابتدا برای «قابل‌ادغام‌شدن» آموزش ندیده، فقط بعداً روی آن
+فشرده‌سازی اعمال می‌شود. «آموزش آگاه از Pooling» دقیقاً همین شکاف را
+هدف می‌گیرد: آموزش مدل به‌گونه‌ای که Embeddingهای مفید، حتی بعد از ادغام
+هم زنده بمانند.
+
+<KeyFacts
+  facts={[
+    { label: 'تاریخ انتشار', value: '۱۱ نوامبر ۲۰۲۶ — وبلاگ Hugging Face' },
+    { label: 'نویسنده', value: 'Tom Aarsen، تیم Sentence Transformers (Hugging Face)؛ بر پایهٔ کار قبلی Stefan Josef و LightOn' },
+    { label: 'ابزار پیاده‌سازی', value: '`MultiVectorTokenPoolingLoss` در کتابخانه Sentence Transformers، به‌صورت Wrapper روی Lossهای بازیابی موجود' },
+    { label: 'بنچمارک ارزیابی', value: 'NanoBEIR@13 (میانگین nDCG@10)' },
+    { label: 'محدودیت آزمایش', value: 'نتایج با یک Epoch آموزش، یک Seed و بدون جست‌وجوی Hyperparameter به‌دست آمده‌اند' },
+  ]}
+/>
+
+## چگونه کار می‌کند؟
+
+<ProcessSteps
+  title="ترکیب دو Loss در هر Batch آموزشی"
+  steps={[
+    { title: '۱. Loss روی Embedding کامل', body: 'یک Loss بازیابی استاندارد، با استفاده از Embeddingهای کامل و فشرده‌نشدهٔ سند محاسبه می‌شود.' },
+    { title: '۲. Loss روی نسخهٔ Pool‌شده', body: 'همان اسناد، این‌بار با Clustering نوع Ward به حدود یک‌چهارم تعداد بردار (pool_factor=4) فشرده می‌شوند و یک Loss دوم روی همین نسخهٔ فشرده محاسبه می‌شود.' },
+    { title: '۳. میانگین‌گیری و عبور گرادیان', body: 'دو Loss با وزن یکسان میانگین‌گیری می‌شوند و همان Encoder را به‌روزرسانی می‌کنند. چون Clustering یک عملیات گسسته است، یک Straight-Through Estimator گرادیان را از بردارهای Pool‌شده به بردارهای عضوشان برمی‌گرداند.' },
+  ]}
+/>
+
+<ComparisonTable
+  caption="نتایج NanoBEIR@13 (میانگین nDCG×۱۰۰) در pool_factor=4"
+  headers={['روش آموزش', 'امتیاز فشرده‌نشده', 'امتیاز Pool‌شده (×۴ فشرده)', 'حفظ کیفیت نسبت به حالت فشرده‌نشده']}
+  rows={[
+    ['آموزش معمولی (بدون آگاهی از Pooling)', '51.84', '49.03', '۹۴.۶٪'],
+    ['آموزش آگاه از Pooling', '52.39', '51.23', '۹۷.۸٪'],
+  ]}
+  highlightCol={2}
+/>
+
+<Callout type="fact" title="کاهش حجم ذخیره‌سازی هم‌زمان با بهبود کیفیت">
+  در همان آزمایش pool_factor=4، تعداد بردارهای ذخیره‌شده برای هر سند
+  حدود ۷۴.۸٪ کمتر از حالت بدون Pooling بوده است. در تنظیمات Pooling
+  تهاجمی‌تر (max_tokens=4)، فاصلهٔ بین دو روش بزرگ‌تر هم شده: ۳۷.۲۲ در
+  برابر ۴۳.۰۰ (رشد ۵.۷۸ واحدی) به نفع آموزش آگاه از Pooling.
+</Callout>
+
+## چرا این موضوع برای مهندسان RAG اهمیت دارد؟
+
+هر تیمی که از Embeddingهای چندبرداری (مثل ColBERT) برای بازیابی در
+سیستم‌های RAG استفاده می‌کند، همیشه با یک مبادله روبه‌رو بوده: دقت
+بیشتر در برابر هزینهٔ ذخیره‌سازی و حافظه بیشتر. این تکنیک نشان می‌دهد
+این مبادله همیشه خطی نیست — با تغییر در روش آموزش (نه فقط روش
+فشرده‌سازی بعد از آموزش)، می‌توان همان سطح فشرده‌سازی را با افت کیفیت
+کمتر، یا حتی گاهی بدون افت قابل‌توجه، به‌دست آورد. از آنجا که پیاده‌سازی
+آن به‌صورت یک Loss Wrapper در کتابخانه‌ای رایج (Sentence Transformers)
+عرضه شده، تیم‌هایی که همین حالا مدل Embedding چندبرداری خودشان را
+Fine-Tune می‌کنند، می‌توانند این روش را نسبتاً ساده آزمایش کنند.
+
+<Callout type="analysis" title="نکاتی برای خوانش محتاطانه نتایج">
+  نویسنده خودش تصریح کرده که همهٔ این نتایج با یک Epoch آموزش، یک Seed
+  تصادفی ثابت و بدون هیچ جست‌وجوی Hyperparameter به‌دست آمده‌اند — یعنی
+  این یک آزمایش اثبات-مفهوم (Proof-of-Concept) معتبر است، نه یک ارزیابی
+  نهایی و جامع. همچنین این مقاله یک پست وبلاگ مستقل است، نه یک مقاله
+  داوری‌شده؛ پیش از استفاده در Production، تکرار نتایج روی دادهٔ
+  اختصاصی خودِ هر تیم توصیه می‌شود.
+</Callout>
